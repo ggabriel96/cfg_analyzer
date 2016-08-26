@@ -1,0 +1,56 @@
+GLC:
+
+<sym> ::= !|@|#|$|%|&|*|(|)|-|_|=|+|'|[|]|{|}|^|~|`|/|?|;|:|,|.|<|>||
+<digit> ::= 0|1|2|3|4|5|6|7|8|9
+<char> ::= a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z
+-- Completar:
+<ascii> ::= <sym>|<digit>|<char>|\|"
+<num> ::= +<num'> | -<num'> | <num'>
+<num'> ::=  <digit><num''> | <digit><num''>.<digit><num''>
+<num''> ::= <digit><num''> | &
+
+-- Regex \"(\\.|[^\\"])*\" convertida para GLC abaixo:
+<str> ::= "<str'>"
+<str'> ::= \<str'''><str'>|<str''><str'>|&
+<str''> ::= <char>|<digit>|<sym>
+<str'''> ::= \|"|<str''>
+
+<lit> ::= '<ascii>'|<num>|<str>
+
+<var> ::= <char><var'>|_<var'>
+<var'> ::= <char><var'>|_<var'>|<digit><var'>|&
+
+<decl> ::= let <varlist>;
+<varlist> ::= <var><varatr>
+<varatr> ::= =<exp>|<varl>
+<varl> ::= ,<varlist>|&
+
+<mat> ::= +|-|*|/|%|&| | |^|&&| ||
+<not> ::= ~|!
+
+<op> ::= <var>|<lit>
+
+-- A ::= + | / | - | * | %
+-- E ::= E A E
+-- E ::= ( E )
+-- E ::= operando
+-- <exp> ::= <exp><mat><exp>|(<exp>)|<not><exp>|<op>
+-- Removida recursão à esquerda:
+<exp> ::= (<exp>)<exp'>|<not><exp><exp'>|<op><exp'>
+<exp'> ::= <mat><exp><exp'>|&
+
+<attr> ::= <var>=<exp>;
+
+<lines> ::= <line><lines>|&
+<line> ::= if|for|while|attr
+
+<if> ::= if(<exp>|<attr>)<if'>
+<if'> ::= <line>|{<lines>}<else>
+<else> ::= else<else'>|&
+<else'> ::= <line>|{<lines>}
+
+<for> ::= for(<attr>|&;<exp>|<attr>|&;<attr>|&)<for'>
+<for'> ::= <line>|{<lines>}
+
+<while> ::= while(<exp>|<attr>)<while'>
+<while'> ::= <line>|{<lines>}
