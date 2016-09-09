@@ -37,9 +37,12 @@ int read_grammar() {
 
 void print_ndfa() {
   for (auto& i : at) {
-    printf("%d ::= ", i.first);
+    printf("<%s> ::= ", old_name[i.first].c_str());
     for (auto& j: i.second) {
-      for (auto& k: j) printf(".%d", k.name);
+      for (auto& k: j) {
+	if (k.isterm) printf("%c", k.name);
+	else printf("<%s>", old_name[k.name].c_str());
+      }
       printf(" | ");
     }
     printf("\n");
