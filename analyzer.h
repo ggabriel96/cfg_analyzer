@@ -3,10 +3,14 @@
 #include <vector>
 using namespace std;
 
-typedef struct Token {
-  string name;
-  boolean isterm;
-} token_t;
+struct Symbol {
+  int name;
+  bool isterm;
+  Symbol() {}; Symbol(int _n, bool _t) : name(_n), isterm(_t) {};
+};
 
-typedef vector< token_t > prod;
-typedef map< string, vector<prod> > ndfa;
+typedef vector< Symbol > prod;
+typedef map< int, vector<prod> > ndfa;
+
+int read_grammar();
+void print_ndfa();

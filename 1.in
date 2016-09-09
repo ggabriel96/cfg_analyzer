@@ -1,0 +1,5 @@
+<lines> ::= <line><lines> | &
+<line> ::= <if> | <for> | <while> | <decl> | <attr>
+<if> ::= if(<exp> | <attr>)<if'>
+<if'> ::= <line> | {<lines>}<else>
+<else> ::= else<else'> | &
