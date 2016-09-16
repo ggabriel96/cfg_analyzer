@@ -3,21 +3,22 @@
 #include <iostream>
 using namespace std;
 
+ndfa at;
+int cont = 256;
 map<string, int> new_name;
 map<int, string> old_name;
-ndfa at;
 
-int cont = 256;
 
 int read_grammar() {
-  string line, name; bool brackets; int start, i, cur;
+  int start, cur, i;
+  string line, name; bool brackets;
   while (getline(cin, line)) {
-    prod p; brackets = false; line.append("|");
+    prod p; brackets = false; line.append(" |");
     for (start = i = 0; line[i] != '\0'; i++) {
       if (line[i] == ' ') continue;
       if (line[i] == '|')
-        { at[start].push_back(p); p.clear(); }
-      else if (line[i] == '<') brackets = true;
+        {at[start].push_back(p); p.clear(); }
+      else if (line[i] == '<' && i + 1 < (int) line.length() && line[i + 1] != '=' && line[i + 1] != ' ') brackets = true;
       else if (line[i] == '>' && brackets == true) {
         brackets = false;
         if (new_name.find(name) == new_name.end()) {
@@ -35,15 +36,18 @@ int read_grammar() {
   return 0;
 }
 
+void print_prod(prod p) {
+  for (auto& k: p)
+    if (k.isterm) printf("%c", k.name);
+    else printf("<%s>", old_name[k.name].c_str());
+  printf(" | ");
+}
+
 void print_ndfa() {
   for (auto& i : at) {
     printf("<%s> ::= ", old_name[i.first].c_str());
     for (auto& j: i.second) {
-      for (auto& k: j) {
-	if (k.isterm) printf("%c", k.name);
-	else printf("<%s>", old_name[k.name].c_str());
-      }
-      printf(" | ");
+      print_prod(j);
     }
     printf("\n");
   }

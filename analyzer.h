@@ -13,4 +13,5 @@ typedef vector< Symbol > prod;
 typedef map< int, vector<prod> > ndfa;
 
 int read_grammar();
+void print_prod(prod);
 void print_ndfa();
