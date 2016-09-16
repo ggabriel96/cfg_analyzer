@@ -5,9 +5,9 @@ using namespace std;
 
 ndfa at;
 int cont = 256;
+set<string> sep;
 map<string, int> new_name;
 map<int, string> old_name;
-
 
 int read_grammar() {
   int start, cur, i;
@@ -34,6 +34,10 @@ int read_grammar() {
     }
   }
   return 0;
+}
+
+void build_ndfa() {
+
 }
 
 void print_prod(prod p) {
