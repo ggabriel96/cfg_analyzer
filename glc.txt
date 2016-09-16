@@ -13,30 +13,21 @@
 <varatr> ::= =<exp> | <varl>
 <varl> ::= ,<varlist> | &
 <attr> ::= <var>=<exp>;
--- A ::= + | / | - | * | %
--- E ::= E A E
--- E ::= (E)
--- E ::= operando
--- <exp> ::= <exp><mat><exp> | (<exp>) | <not><exp> | <op>
--- Removida recursão à esquerda:
-<exp> ::= (<exp>)<exp'> | <not><exp><exp'> | <op><exp'>
+<exp> ::= (<exp>)<exp'> | not <exp><exp'> | <op><exp'>
 <exp'> ::= <mat><exp><exp'> | &
 <var> ::= <char><var'> | _<var'>
 <var'> ::= <char><var'> | _<var'> | <digit><var'> | &
-<not> ::= ~ | !
 <op> ::= <var> | <lit>
-<mat> ::= + | - | * | / | % | & | | | ^ | && | ||
+<mat> ::= + | - | * | / | % | ^ | or | and | equals
 <char> ::= a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z | A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
 <digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 <lit> ::= '<ascii>' | <num> | <str>
--- Completar símbolos da tabela ASCII:
 <ascii> ::= <sym> | <digit> | <char> | \ | "
 <num> ::= +<num'> | -<num'> | <num'>
 <num'> ::= <digit><num''> | <digit><num''>.<digit><num''>
 <num''> ::= <digit><num''> | &
--- Regex \"(\\. | [^\\"])*\" convertida para GLC abaixo:
 <str> ::= "<str'>"
 <str'> ::= \<str'''><str'> | <str''><str'> | &
 <str''> ::= <char> | <digit> | <sym>
 <str'''> ::= \ | " | <str''>
-<sym> ::= ! | @ | # | $ | % | & | * | ( | ) | - | _ | = | + | ' | [ | ] | { | } | ^ | ~ | ` | / | ? | ; | : | , | . | < | > | |
+<sym> ::= ! | @ | # | $ | % | * | ( | ) | - | _ | = | + | ' | [ | ] | { | } | ` | / | ? | ; | : | , | . | < | >
