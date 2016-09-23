@@ -12,8 +12,41 @@ set<string> sep;
 // as produções para montarmos um token, como variáveis, números, strings...
 // esses estados estão marcados com '*' no primeiro caractere da linha
 vector<int> special;
+set<string> separators;
 map<string, int> new_name;
 map<int, string> old_name;
+
+void init() {
+  separators.insert(" ");
+  separators.insert("(");
+  separators.insert(")");
+  separators.insert("+");
+  separators.insert("-");
+  separators.insert("*");
+  separators.insert("/");
+  separators.insert("%%");
+  separators.insert("^");
+  separators.insert("?");
+  separators.insert(":");
+  separators.insert("<");
+  separators.insert("=");
+  separators.insert(">");
+  separators.insert("[");
+  separators.insert("]");
+  separators.insert("{");
+  separators.insert("}");
+  separators.insert(".");
+  separators.insert(",");
+  separators.insert(";");
+  separators.insert("'"); // ?
+  separators.insert("\""); // ?
+  // separators.insert("or");
+  // separators.insert("and");
+  // separators.insert("not");
+  // separators.insert("<=");
+  // separators.insert("==");
+  // separators.insert(">=");
+}
 
 int read_grammar() {
   int start, cur, i;
@@ -52,7 +85,17 @@ int read_grammar() {
 }
 
 void build_ndfa() {
-
+  for (auto& rule: at) {
+    printf("Rule %d\n", rule.first);
+    for (auto& prod: rule.second) {
+      for (auto& sym: prod) {
+        if (sym.name > 255) printf("<%d>", sym.name);
+        else printf("%c", sym.name);
+      }
+      printf(" | ");
+    }
+    printf("\n");
+  }
 }
 
 void print_prod(prod p) {

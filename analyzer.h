@@ -12,6 +12,7 @@ struct Symbol {
 typedef vector< Symbol > prod;
 typedef map< int, vector<prod> > ndfa;
 
+void init();
 int read_grammar();
 void build_ndfa();
 void print_prod(prod);
