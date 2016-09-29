@@ -17,3 +17,4 @@ int read_grammar();
 void build_ndfa();
 void print_prod(prod);
 void print_ndfa();
+void print_ndfatokens();

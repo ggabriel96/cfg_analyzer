@@ -7,5 +7,6 @@ int main(int argc, char const *argv[]) {
   read_grammar();
   print_ndfa();
   build_ndfa();
+  print_ndfatokens();
   return 0;
 }
