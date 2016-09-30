@@ -13,8 +13,8 @@ set<string> sep;
 // vetor de inteiros indicando os estados especiais que precisamos seguir
 // as produções para montarmos um token, como variáveis, números, strings...
 // esses estados estão marcados com '*' no primeiro caractere da linha
-set<int> special;
 set<string> separators;
+set<int> special, finals;
 map<string, int> new_name;
 map<int, string> old_name;
 vector< array<vector<int>, 256> > ndfatok;
@@ -100,18 +100,50 @@ void build_ndfa() {
     for (auto& prod: rule.second) {
       state_from = 0;
       for (auto& sym: prod) {
-        if (!sym.isterm) continue;
-        if (separators.find(string((char *) &sym.name)) != separators.end()) {
+        printf("sym: [%c] isterm: %d\n", (char) sym.name, sym.isterm);
+        if ((char) sym.name == '&') continue;
+        if (ndfatok.size() <= state_from) {
+          ndfatok.push_back(array<vector<int>, 256>());
+        }
+        if (is_separator(sym) || !sym.isterm) {
+          if (state_from == 0) continue;
           // achamos um separador, olha pro último estado para ver o que reconhecemos
-          continue;
+          printf(">>>>>>> finals %d, sym %c\n", state_from, (char) sym.name);
+          finals.insert(state_from);
+          state_from = 0;
         } else {
-          if (ndfatok.size() <= state_from) ndfatok.push_back(array<vector<int>, 256>());
           ndfatok[state_from][sym.name].push_back(ndfatok.size());
           state_from = ndfatok.size();
         }
+        // if ((!sym.isterm || is_separator(sym)) && state_from == 0) continue;
+        // if (ndfatok.size() <= state_from) {
+        //   ndfatok.push_back(array<vector<int>, 256>());
+        // }
+        // if (is_separator(sym) || !sym.isterm) {
+        //   // achamos um separador, olha pro último estado para ver o que reconhecemos
+        //   finals.insert(state_from);
+        //   state_from = 0;
+        // } else {
+        //   ndfatok[state_from][sym.name].push_back(ndfatok.size());
+        //   state_from = ndfatok.size();
+        // }
+      }
+      if (state_from > 0) {
+        printf(">>>>>>> finals %d\n", state_from);
+        finals.insert(state_from);
       }
     }
   }
+  print_finals();
+}
+
+bool is_separator(symbol_t &sym) {
+  return separators.find(string((char *) &sym.name)) != separators.end();
+}
+
+void print_finals() {
+  for (auto& f: finals)
+    printf("{%d}\n", f);
 }
 
 void print_prod(prod p) {
