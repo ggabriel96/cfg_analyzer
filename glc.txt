@@ -16,7 +16,7 @@
 <varlist> ::= <var><varatr>
 <varatr> ::= "=" <exp> | <varl>
 <varl> ::= "," <varlist> | ""
-<attr> ::= <var> "=" <exp>;
+<attr> ::= <var> "=" <exp> ";"
 <exp> ::= "(" <exp> ")" <exp'> | "!" <exp><exp'> | <op><exp'>
 <exp'> ::= <mat><exp><exp'> | ""
 *<var> ::= <char><var'> | "_" <var'>

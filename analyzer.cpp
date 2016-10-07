@@ -27,7 +27,7 @@ void init() {
   separators.insert("-");
   separators.insert("*");
   separators.insert("/");
-  separators.insert("%%");
+  separators.insert("%");
   separators.insert("^");
   separators.insert("?");
   separators.insert(":");
@@ -52,18 +52,26 @@ void init() {
 }
 
 int read_grammar() {
-  int start, cur, i;
-  string line, name; bool brackets, marked;
+  string line, name;
+  int start = 0, cur = 0, i = 0;
+  bool marked, brackets, quotes;
   while (getline(cin, line)) {
-    prod p; brackets = marked = false; line.append(" |");
+    prod p;
+    line.append(" |");
+    marked = brackets = quotes = false;
     for (i = 0; line[i] != '<' && line[i] != '\0'; i++)
       if (line[i] == '*')
         { line[i] = ' '; marked = true; break; }
     for (start = i = 0; line[i] != '\0'; i++) {
+      if (quotes) {
+
+      } else {
+        if (line[i] == '"') quotes = true;
+      }
       if (line[i] == ' ') continue;
       if (line[i] == '|')
         { at[start].push_back(p); p.clear(); }
-      else if (line[i] == '<' && i + 1 < (int) line.length() && line[i + 1] != '=' && line[i + 1] != ' ') brackets = true;
+      else if (line[i] == '<') brackets = true;
       else if (line[i] == '>' && brackets == true) {
         brackets = false;
         if (new_name.find(name) == new_name.end()) {
@@ -76,6 +84,7 @@ int read_grammar() {
         if (!start) { start = cur; while (line[++i] != '='); }
         else p.push_back(Symbol(cur, false));
       }
+      else if (line[i] == '"')
       else if (brackets) name.append(&line[i], 1);
       else p.push_back(Symbol((int) line[i], true));
     }
@@ -100,36 +109,25 @@ void build_ndfa() {
     for (auto& prod: rule.second) {
       state_from = 0;
       for (auto& sym: prod) {
-        printf("sym: [%c] isterm: %d\n", (char) sym.name, sym.isterm);
+        printf("state_from: %d, sym: '%c', %sterm\n", state_from, (char) sym.name, sym.isterm ? "" : "!");
         if ((char) sym.name == '&') continue;
-        if (ndfatok.size() <= state_from) {
-          ndfatok.push_back(array<vector<int>, 256>());
-        }
-        if (is_separator(sym) || !sym.isterm) {
-          if (state_from == 0) continue;
-          // achamos um separador, olha pro último estado para ver o que reconhecemos
-          printf(">>>>>>> finals %d, sym %c\n", state_from, (char) sym.name);
-          finals.insert(state_from);
-          state_from = 0;
-        } else {
+        if (sym.isterm) {
+          if (ndfatok.size() <= state_from) {
+            ndfatok.push_back(array<vector<int>, 256>());
+          }
           ndfatok[state_from][sym.name].push_back(ndfatok.size());
           state_from = ndfatok.size();
         }
-        // if ((!sym.isterm || is_separator(sym)) && state_from == 0) continue;
-        // if (ndfatok.size() <= state_from) {
-        //   ndfatok.push_back(array<vector<int>, 256>());
-        // }
-        // if (is_separator(sym) || !sym.isterm) {
-        //   // achamos um separador, olha pro último estado para ver o que reconhecemos
-        //   finals.insert(state_from);
-        //   state_from = 0;
-        // } else {
-        //   ndfatok[state_from][sym.name].push_back(ndfatok.size());
-        //   state_from = ndfatok.size();
-        // }
+        // tokens de mais de um char estão indo para outros estados, ao invés de ficar naquele que eles têm que reconhecer, como o 'or' e 'and'. Além disso, '<=' está sendo quebrado em dois tokens porque '<' e '=' são separadores
+        if (is_separator(sym) || !sym.isterm) {
+          if (state_from == 0) continue;
+          printf("State %d is final, sep '%c'\n\n", state_from, (char) sym.name);
+          finals.insert(state_from);
+          state_from = 0;
+        }
       }
       if (state_from > 0) {
-        printf(">>>>>>> finals %d\n", state_from);
+        printf("State %d is final, end of prod\n\n", state_from);
         finals.insert(state_from);
       }
     }
@@ -142,6 +140,7 @@ bool is_separator(symbol_t &sym) {
 }
 
 void print_finals() {
+  printf("\nprint_finals:\n");
   for (auto& f: finals)
     printf("{%d}\n", f);
 }
@@ -154,6 +153,7 @@ void print_prod(prod p) {
 }
 
 void print_ndfa() {
+  printf("\nprint_ndfa:\n");
   for (auto& i : at) {
     printf("<%s> ::= ", old_name[i.first].c_str());
     for (auto& j: i.second) {
