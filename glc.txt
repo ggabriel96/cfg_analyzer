@@ -1,4 +1,4 @@
-lines> ::= <line><lines> | ""
+<lines> ::= <line><lines> | ""
 <line> ::= <if> | <for> | <while> | <decl> | <attr>
 <if> ::= "if" "(" <ifcond> ")" <if'>
 <ifcond> ::= <exp> | <attr>

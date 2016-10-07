@@ -66,126 +66,127 @@ class Symbol():
         self.name = name
         self.isterm = isterm
 
-def read_grammar(f):
-    i = 1;
-    state = SEEK_RULE
-    line = f.readline()
-    while (line != ""):
-        term = None
-        nterm = None
-        rulename = str()
-        for c in line:
-            if state == SEEK_RULE:
-                if c == ' ':
-                    continue
-                if c == '<':
-                    state = SEEK_RULE_NAME
-                elif c == '*':
-                    print("\nSpecial rule");
-                else:
-                    raise GrammarError(EXPECTED_LT, i)
-            elif state == SEEK_RULE_NAME:
-                if c == '>':
-                    if rulename != "":
-                        print("\nRead rule: '{}'".format(rulename))
-                        state = SEEK_ST_COLON
+class Analyzer():
+    def read_grammar(self, grammarFile):
+        i = 1;
+        state = SEEK_RULE
+        line = grammarFile.readline()
+        while (line != ""):
+            term = None
+            nterm = None
+            rulename = str()
+            for c in line:
+                if state == SEEK_RULE:
+                    if c == ' ':
+                        continue
+                    if c == '<':
+                        state = SEEK_RULE_NAME
+                    elif c == '*':
+                        print("\nSpecial rule");
                     else:
-                        raise GrammarError(EMPTY_RULENAME, i)
-                elif c == '<':
-                    raise GrammarError(LT_FOBIDDEN, i)
+                        raise GrammarError(EXPECTED_LT, i)
+                elif state == SEEK_RULE_NAME:
+                    if c == '>':
+                        if rulename != "":
+                            print("\nRead rule: '{}'".format(rulename))
+                            state = SEEK_ST_COLON
+                        else:
+                            raise GrammarError(EMPTY_RULENAME, i)
+                    elif c == '<':
+                        raise GrammarError(LT_FOBIDDEN, i)
+                    else:
+                        rulename += c
+                elif state == SEEK_ST_COLON:
+                    if c == ' ':
+                        continue
+                    if c == ':':
+                        state = SEEK_ND_COLON
+                    else:
+                        raise GrammarError(EXPECTED_COLON, i)
+                elif state == SEEK_ND_COLON:
+                    if c == ':':
+                        state = SEEK_EQUALS
+                    else:
+                        raise GrammarError(EXPECTED_COLON, i)
+                elif state == SEEK_EQUALS:
+                    if c == '=':
+                        state = SEEK_ST_PROD;
+                    else:
+                        raise GrammarError(EXPECTED_EQUALS, i)
+                elif state == SEEK_ST_PROD:
+                    if c == ' ':
+                        continue
+                    if c == '"':
+                        term = str()
+                        state = SEEK_ST_TERM
+                    elif c == '<':
+                        nterm = str()
+                        state = SEEK_ST_NTERM
+                    elif c == '\n':
+                        raise GrammarError(EMPY_PRODUCTION, i)
+                    else:
+                        raise GrammarError(INVALID_TOKEN, i)
+                elif state == SEEK_ST_TERM:
+                    if c == '\\':
+                        state = SEEK_ST_ESC
+                    elif c == '"':
+                        print("Read terminal: '{}'".format(term))
+                        state = SEEK_PROD
+                    else:
+                        term += c
+                elif state == SEEK_ST_NTERM:
+                    if c == '<':
+                        raise GrammarError(LT_FOBIDDEN, i)
+                    elif c == '>':
+                        print("Read nonterminal: '{}'".format(nterm))
+                        state = SEEK_PROD
+                    else:
+                        nterm += c
+                elif state == SEEK_ST_ESC:
+                    if c == '"' or c == '\\':
+                        term += c
+                        state = SEEK_ST_TERM
+                    else:
+                        raise GrammarError(INVALID_ESCAPE, i)
+                elif state == SEEK_PROD:
+                    if c == ' ':
+                        continue
+                    if c == '"':
+                        term = str()
+                        state = SEEK_TERM
+                    elif c == '<':
+                        nterm = str()
+                        state = SEEK_NTERM
+                    elif c == '|':
+                        print("End of production")
+                        state = SEEK_ST_PROD
+                    elif c == '\n':
+                        state = SEEK_RULE
+                    else:
+                        raise GrammarError(INVALID_TOKEN, i)
+                elif state == SEEK_TERM:
+                    if c == '\\':
+                        state = SEEK_ESC
+                    elif c == '"':
+                        print("Read terminal: '{}'".format(term))
+                        state = SEEK_PROD
+                    else:
+                        term += c
+                elif state == SEEK_NTERM:
+                    if c == '<':
+                        raise GrammarError(LT_FOBIDDEN, i)
+                    elif c == '>':
+                        print("Read nonterminal: '{}'".format(nterm))
+                        state = SEEK_PROD
+                    else:
+                        nterm += c
+                elif state == SEEK_ESC:
+                    if c == '"' or c == '\\':
+                        term += c
+                        state = SEEK_TERM
+                    else:
+                        raise GrammarError(INVALID_ESCAPE, i)
                 else:
-                    rulename += c
-            elif state == SEEK_ST_COLON:
-                if c == ' ':
-                    continue
-                if c == ':':
-                    state = SEEK_ND_COLON
-                else:
-                    raise GrammarError(EXPECTED_COLON, i)
-            elif state == SEEK_ND_COLON:
-                if c == ':':
-                    state = SEEK_EQUALS
-                else:
-                    raise GrammarError(EXPECTED_COLON, i)
-            elif state == SEEK_EQUALS:
-                if c == '=':
-                    state = SEEK_ST_PROD;
-                else:
-                    raise GrammarError(EXPECTED_EQUALS, i)
-            elif state == SEEK_ST_PROD:
-                if c == ' ':
-                    continue
-                if c == '"':
-                    term = str()
-                    state = SEEK_ST_TERM
-                elif c == '<':
-                    nterm = str()
-                    state = SEEK_ST_NTERM
-                elif c == '\n':
-                    raise GrammarError(EMPY_PRODUCTION, i)
-                else:
-                    raise GrammarError(INVALID_TOKEN, i)
-            elif state == SEEK_ST_TERM:
-                if c == '\\':
-                    state = SEEK_ST_ESC
-                elif c == '"':
-                    print("Read terminal: '{}'".format(term))
-                    state = SEEK_PROD
-                else:
-                    term += c
-            elif state == SEEK_ST_NTERM:
-                if c == '<':
-                    raise GrammarError(LT_FOBIDDEN, i)
-                elif c == '>':
-                    print("Read nonterminal: '{}'".format(nterm))
-                    state = SEEK_PROD
-                else:
-                    nterm += c
-            elif state == SEEK_ST_ESC:
-                if c == '"' or c == '\\':
-                    term += c
-                    state = SEEK_ST_TERM
-                else:
-                    raise GrammarError(INVALID_ESCAPE, i)
-            elif state == SEEK_PROD:
-                if c == ' ':
-                    continue
-                if c == '"':
-                    term = str()
-                    state = SEEK_TERM
-                elif c == '<':
-                    nterm = str()
-                    state = SEEK_NTERM
-                elif c == '|':
-                    print("End of production")
-                    state = SEEK_ST_PROD
-                elif c == '\n':
-                    state = SEEK_RULE
-                else:
-                    raise GrammarError(INVALID_TOKEN, i)
-            elif state == SEEK_TERM:
-                if c == '\\':
-                    state = SEEK_ESC
-                elif c == '"':
-                    print("Read terminal: '{}'".format(term))
-                    state = SEEK_PROD
-                else:
-                    term += c
-            elif state == SEEK_NTERM:
-                if c == '<':
-                    raise GrammarError(LT_FOBIDDEN, i)
-                elif c == '>':
-                    print("Read nonterminal: '{}'".format(nterm))
-                    state = SEEK_PROD
-                else:
-                    nterm += c
-            elif state == SEEK_ESC:
-                if c == '"' or c == '\\':
-                    term += c
-                    state = SEEK_TERM
-                else:
-                    raise GrammarError(INVALID_ESCAPE, i)
-            else:
-                raise RuntimeError("Reached invalid state {}".format(state))
-        i += 1
-        line = f.readline()
+                    raise RuntimeError("Reached invalid state {}".format(state))
+            i += 1
+            line = grammarFile.readline()
