@@ -15,14 +15,58 @@ SEEK_PROD = 10
 SEEK_TERM = 11
 SEEK_NTERM = 12
 SEEK_ESC = 13
-ERR_LESS = -1
-ERR_EMPTY_RULE = -2
-ERR_LESS_FORBID = -3
-ERR_COLON = -4
-ERR_EQUALS = -5
-ERR_EMPTY = -6
-ERR_TOK = -7
-ERR_ESC = -8
+
+class GrammarError(Exception):
+    EXPECTED_LT = -1
+    EMPTY_RULENAME = -2
+    LT_FOBIDDEN = -3
+    EXPECTED_COLON = -4
+    EXPECTED_EQUALS = -5
+    EMPY_PRODUCTION = -6
+    INVALID_TOKEN = -7
+    INVALID_ESCAPE = -8
+
+    def __init__(self, code, message = None, lineNumber = None):
+        self.code = code
+        self.message = message
+        self.lineNumber = lineNumber
+
+    # @classmethod
+    # def withLine(cls, code, lineNumber):
+    #     return cls(cls, code, None, lineNumber)
+
+    def __str__(self):
+        string = None
+        if self.message is not None:
+            string = self.message
+        if self.lineNumber is not None:
+            if string is not None:
+                string += ", at line {}".format(self.lineNumber)
+            else:
+                string = "at line {}".format(self.lineNumber)
+        if string is not None:
+            string += ", "
+        else:
+            string = str()
+        if self.code == GrammarError.EXPECTED_LT:
+            string += "EXPECTED_LT"
+        elif self.code == GrammarError.EMPTY_RULENAME:
+            string += "EMPTY_RULENAME"
+        elif self.code == GrammarError.LT_FOBIDDEN:
+            string += "LT_FOBIDDEN"
+        elif self.code == GrammarError.EXPECTED_COLON:
+            string += "EXPECTED_COLON"
+        elif self.code == GrammarError.EXPECTED_EQUALS:
+            string += "EXPECTED_EQUALS"
+        elif self.code == GrammarError.EMPY_PRODUCTION:
+            string += "EMPY_PRODUCTION"
+        elif self.code == GrammarError.INVALID_TOKEN:
+            string += "INVALID_TOKEN"
+        elif self.code == GrammarError.INVALID_ESCAPE:
+            string += "INVALID_ESCAPE"
+        else:
+            string = "error {}".format(str(self.code))
+        return string
 
 class Symbol():
     def __init__(self, name, isterm):
@@ -46,16 +90,16 @@ def read_grammar(f):
                 elif c == '*':
                     print("\nSpecial rule");
                 else:
-                    raise SyntaxError(ERR_LESS)
+                    raise GrammarError(GrammarError.EXPECTED_LT)
             elif state == SEEK_RULE_NAME:
                 if c == '>':
                     if rulename != "":
                         print("\nRead rule: '{}'".format(rulename))
                         state = SEEK_ST_COLON
                     else:
-                        raise SyntaxError(ERR_EMPTY_RULE)
+                        raise GrammarError(GrammarError.EMPTY_RULENAME)
                 elif c == '<':
-                    raise SyntaxError(ERR_LESS_FORBID)
+                    raise GrammarError(GrammarError.LT_FOBIDDEN)
                 else:
                     rulename += c
             elif state == SEEK_ST_COLON:
@@ -64,17 +108,17 @@ def read_grammar(f):
                 if c == ':':
                     state = SEEK_ND_COLON
                 else:
-                    raise SyntaxError(ERR_COLON)
+                    raise GrammarError(GrammarError.EXPECTED_COLON)
             elif state == SEEK_ND_COLON:
                 if c == ':':
                     state = SEEK_EQUALS
                 else:
-                    raise SyntaxError(ERR_COLON)
+                    raise GrammarError(GrammarError.EXPECTED_COLON)
             elif state == SEEK_EQUALS:
                 if c == '=':
                     state = SEEK_ST_PROD;
                 else:
-                    raise SyntaxError(ERR_EQUALS)
+                    raise GrammarError(GrammarError.EXPECTED_EQUALS)
             elif state == SEEK_ST_PROD:
                 if c == ' ':
                     continue
@@ -85,9 +129,9 @@ def read_grammar(f):
                     nterm = str()
                     state = SEEK_ST_NTERM
                 elif c == '\n':
-                    raise SyntaxError(ERR_EMPTY)
+                    raise GrammarError(GrammarError.EMPY_PRODUCTION)
                 else:
-                    raise SyntaxError(ERR_TOK)
+                    raise GrammarError(GrammarError.INVALID_TOKEN)
             elif state == SEEK_ST_TERM:
                 if c == '\\':
                     state = SEEK_ST_ESC
@@ -98,7 +142,7 @@ def read_grammar(f):
                     term += c
             elif state == SEEK_ST_NTERM:
                 if c == '<':
-                    raise SyntaxError(ERR_LESS_FORBID)
+                    raise GrammarError(GrammarError.LT_FOBIDDEN)
                 elif c == '>':
                     print("Read nonterminal: '{}'".format(nterm))
                     state = SEEK_PROD
@@ -109,7 +153,7 @@ def read_grammar(f):
                     term += c
                     state = SEEK_ST_TERM
                 else:
-                    raise SyntaxError(ERR_ESC)
+                    raise GrammarError(GrammarError.INVALID_ESCAPE)
             elif state == SEEK_PROD:
                 if c == ' ':
                     continue
@@ -125,7 +169,7 @@ def read_grammar(f):
                 elif c == '\n':
                     state = SEEK_RULE
                 else:
-                    raise SyntaxError(ERR_TOK)
+                    raise GrammarError(GrammarError.INVALID_TOKEN)
             elif state == SEEK_TERM:
                 if c == '\\':
                     state = SEEK_ESC
@@ -136,7 +180,7 @@ def read_grammar(f):
                     term += c
             elif state == SEEK_NTERM:
                 if c == '<':
-                    raise SyntaxError(ERR_LESS_FORBID)
+                    raise GrammarError(GrammarError.LT_FOBIDDEN)
                 elif c == '>':
                     print("Read nonterminal: '{}'".format(nterm))
                     state = SEEK_PROD
@@ -147,7 +191,7 @@ def read_grammar(f):
                     term += c
                     state = SEEK_TERM
                 else:
-                    raise SyntaxError(ERR_ESC)
+                    raise GrammarError(GrammarError.INVALID_ESCAPE)
             else:
                 raise RuntimeError("Reached invalid state {}".format(state))
         i += 1
