@@ -1,22 +1,26 @@
-<lines> ::= <line><lines> | &
+<lines> ::= <line><lines> | ""
 <line> ::= <if> | <for> | <while> | <decl> | <attr>
-<if> ::= "if" "(" <exp> | <attr> ")" <if'>
+<if> ::= "if" "(" <ifcond> ")" <if'>
+<ifcond> ::= <exp> | <attr>
 <if'> ::= <line> | "{" <lines> "}" <else>
-<else> ::= "else" <else'> | &
+<else> ::= "else" <else'> | ""
 <else'> ::= <line> | "{" <lines> "}"
-<for> ::= "for" "(" <attr> | & ";" <exp> | <attr> | & ";" <attr> | & ")" <for'>
+<for> ::= "for" "(" <forinit> ";" <forcond> ";" <forinc> ")" <for'>
+<forinit> ::= <attr> | ""
+<forcond> ::= <ifcond> | ""
+<forinc> ::= <attr> | ""
 <for'> ::= <line> | "{" <lines> "}"
-<while> ::= "while" "(" <exp> | <attr> ")" <while'>
+<while> ::= "while" "(" <ifcond> ")" <while'>
 <while'> ::= <line> | "{" <lines> "}"
 <decl> ::= "let" <varlist> ";"
 <varlist> ::= <var><varatr>
 <varatr> ::= "=" <exp> | <varl>
-<varl> ::= "," <varlist> | &
+<varl> ::= "," <varlist> | ""
 <attr> ::= <var> "=" <exp>;
 <exp> ::= "(" <exp> ")" <exp'> | "!" <exp><exp'> | <op><exp'>
-<exp'> ::= <mat><exp><exp'> | &
+<exp'> ::= <mat><exp><exp'> | ""
 *<var> ::= <char><var'> | "_" <var'>
-*<var'> ::= <char><var'> | "_" <var'> | <digit><var'> | &
+*<var'> ::= <char><var'> | "_" <var'> | <digit><var'> | ""
 <op> ::= <var> | <lit>
 <mat> ::= "+" | "-" | "*" | "/" | "%" | "^" | "or" | "and" | "<=" | "<" | "==" | "!=" | ">" | ">="
 <char> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
@@ -25,9 +29,9 @@
 *<ascii> ::= <sym> | <digit> | <char> | "\\" | "\""
 *<num> ::= "+" <num'> | "-" <num'> | <num'>
 *<num'> ::= <digit><num''> | <digit><num''> "." <digit><num''>
-*<num''> ::= <digit><num''> | &
+*<num''> ::= <digit><num''> | ""
 *<str> ::= "\"" <str'> "\""
-*<str'> ::= "\\" <str'''><str'> | <str''><str'> | &
+*<str'> ::= "\\" <str'''><str'> | <str''><str'> | ""
 *<str''> ::= <char> | <digit> | <sym>
 *<str'''> ::= "\\" | "\"" | <str''>
 <sym> ::= "!" | "@" | "#" | "$" | "%" | "&" | "*" | "(" | ")" | "-" | "_" | "=" | "+" | "'" | "[" | "]" | "{" | "}" | "^" | "~" | "`" | "/" | "?" | ";" | ":" | "," | "." | "<" | ">" | "|"
