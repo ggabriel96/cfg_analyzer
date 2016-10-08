@@ -22,6 +22,7 @@ EXPECTED_EQUALS = -5
 EMPY_PRODUCTION = -6
 INVALID_TOKEN = -7
 INVALID_ESCAPE = -8
+DUPLICATED_RULE = -9
 
 separators = {" ", "(", ")", "+", "-", "*", "/", "%", "^", "?", ":", "<", "=", ">", "[", "]", "{", "}", ".", ",", ";", "'", "\""}
 
@@ -56,6 +57,8 @@ class GrammarError(Exception):
                 string = "Invalid token"
             elif self.code == INVALID_ESCAPE:
                 string = "Invalid escape sequence"
+            elif self.code == DUPLICATED_RULE:
+                string = "Duplicated rule"
             else:
                 string = "Error {}".format(str(self.code))
         if self.lineNumber is not None:
@@ -67,15 +70,31 @@ class Symbol():
         self.name = name
         self.isterm = isterm
 
+    def __str__(self):
+        if self.isterm:
+            if self.name == "":
+                return "&"
+            return "'{}'".format(self.name)
+        return "<{}>".format(self.name)
+
 class Analyzer():
+    def __init__(self, verbose = False):
+        # https://docs.python.org/3/library/stdtypes.html#dict
+        self.grammar = {}
+        # https://docs.python.org/3/library/stdtypes.html#set
+        self.asterisk = set()
+        self.finals = set()
+        self.verbose = verbose
+
     def readgr(self, grammarFile):
         i = 1
         state = SEEK_RULE
         line = grammarFile.readline()
         while (line != ""):
-            term = None
-            nterm = None
+            symbol = None
+            special = False
             rulename = str()
+            production = None
             for c in line:
                 if state == SEEK_RULE:
                     if c == ' ':
@@ -83,14 +102,21 @@ class Analyzer():
                     if c == '<':
                         state = SEEK_RULE_NAME
                     elif c == '*':
-                        print("\nSpecial rule");
+                        special = True
                     else:
                         raise GrammarError(EXPECTED_LT, i)
                 elif state == SEEK_RULE_NAME:
                     if c == '>':
                         if rulename != "":
-                            print("\nRead rule: '{}'".format(rulename))
+                            if rulename in self.grammar:
+                                raise GrammarError(DUPLICATED_RULE, i)
+                            if special:
+                                self.asterisk.add(rulename)
+                            self.grammar[rulename] = list()
                             state = SEEK_ST_COLON
+
+                            if self.verbose:
+                                print("\nRule '{}'".format(rulename))
                         else:
                             raise GrammarError(EMPTY_RULENAME, i)
                     elif c == '<':
@@ -111,6 +137,7 @@ class Analyzer():
                         raise GrammarError(EXPECTED_COLON, i)
                 elif state == SEEK_EQUALS:
                     if c == '=':
+                        production = list()
                         state = SEEK_ST_PROD;
                     else:
                         raise GrammarError(EXPECTED_EQUALS, i)
@@ -118,10 +145,10 @@ class Analyzer():
                     if c == ' ':
                         continue
                     if c == '"':
-                        term = str()
+                        symbol = str()
                         state = SEEK_ST_TERM
                     elif c == '<':
-                        nterm = str()
+                        symbol = str()
                         state = SEEK_ST_NTERM
                     elif c == '\n':
                         raise GrammarError(EMPY_PRODUCTION, i)
@@ -131,21 +158,27 @@ class Analyzer():
                     if c == '\\':
                         state = SEEK_ST_ESC
                     elif c == '"':
-                        print("Read terminal: '{}'".format(term))
+                        production.append(Symbol(symbol, True))
                         state = SEEK_PROD
+
+                        if self.verbose:
+                            print("Terminal '{}'".format(symbol))
                     else:
-                        term += c
+                        symbol += c
                 elif state == SEEK_ST_NTERM:
                     if c == '<':
                         raise GrammarError(LT_FOBIDDEN, i)
                     elif c == '>':
-                        print("Read nonterminal: '{}'".format(nterm))
+                        production.append(Symbol(symbol, False))
                         state = SEEK_PROD
+
+                        if self.verbose:
+                            print("Non-terminal '{}'".format(symbol))
                     else:
-                        nterm += c
+                        symbol += c
                 elif state == SEEK_ST_ESC:
                     if c == '"' or c == '\\':
-                        term += c
+                        symbol += c
                         state = SEEK_ST_TERM
                     else:
                         raise GrammarError(INVALID_ESCAPE, i)
@@ -153,37 +186,51 @@ class Analyzer():
                     if c == ' ':
                         continue
                     if c == '"':
-                        term = str()
+                        symbol = str()
                         state = SEEK_TERM
                     elif c == '<':
-                        nterm = str()
+                        symbol = str()
                         state = SEEK_NTERM
                     elif c == '|':
-                        print("End of production")
+                        self.grammar[rulename].append(production)
+                        production = list()
                         state = SEEK_ST_PROD
+
+                        if self.verbose:
+                            print("End of production")
                     elif c == '\n':
+                        self.grammar[rulename].append(production)
                         state = SEEK_RULE
+
+                        if self.verbose:
+                            print("End of rule")
                     else:
                         raise GrammarError(INVALID_TOKEN, i)
                 elif state == SEEK_TERM:
                     if c == '\\':
                         state = SEEK_ESC
                     elif c == '"':
-                        print("Read terminal: '{}'".format(term))
+                        production.append(Symbol(symbol, True))
                         state = SEEK_PROD
+
+                        if self.verbose:
+                            print("Terminal '{}'".format(symbol))
                     else:
-                        term += c
+                        symbol += c
                 elif state == SEEK_NTERM:
                     if c == '<':
                         raise GrammarError(LT_FOBIDDEN, i)
                     elif c == '>':
-                        print("Read nonterminal: '{}'".format(nterm))
+                        production.append(Symbol(symbol, False))
                         state = SEEK_PROD
+
+                        if self.verbose:
+                            print("Non-terminal '{}'".format(symbol))
                     else:
-                        nterm += c
+                        symbol += c
                 elif state == SEEK_ESC:
                     if c == '"' or c == '\\':
-                        term += c
+                        symbol += c
                         state = SEEK_TERM
                     else:
                         raise GrammarError(INVALID_ESCAPE, i)
@@ -192,12 +239,25 @@ class Analyzer():
             i += 1
             line = grammarFile.readline()
 
+    def printgr(self):
+        for rule, productions in self.grammar.items():
+            print("<{}> ::= ".format(rule), end = "")
+            for production in productions:
+                for symbol in production:
+                    print(symbol, end = "")
+                print(" | ", end = "")
+            print()
+
 def main(argv):
     # The with statement allows objects like files to be used in a way
     # that ensures they are always cleaned up promptly and correctly.
     with open(argv[1], 'r') as f:
         a = Analyzer()
         a.readgr(f)
+        print("Special states:")
+        print(a.asterisk)
+        print("\nGrammar:")
+        a.printgr()
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
