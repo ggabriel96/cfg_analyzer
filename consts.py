@@ -1,0 +1,24 @@
+SEEK_RULE = 1
+SEEK_RULE_NAME = 2
+SEEK_ST_COLON = 3
+SEEK_ND_COLON = 4
+SEEK_EQUALS = 5
+SEEK_ST_PROD = 6
+SEEK_ST_TERM = 7
+SEEK_ST_NTERM = 8
+SEEK_ST_ESC = 9
+SEEK_PROD = 10
+SEEK_TERM = 11
+SEEK_NTERM = 12
+SEEK_ESC = 13
+EXPECTED_LT = -1
+EMPTY_RULENAME = -2
+LT_FOBIDDEN = -3
+EXPECTED_COLON = -4
+EXPECTED_EQUALS = -5
+EMPY_PRODUCTION = -6
+INVALID_TOKEN = -7
+INVALID_ESCAPE = -8
+DUPLICATED_RULE = -9
+
+separators = {" ", "(", ")", "+", "-", "*", "/", "%", "^", "?", ":", "<", "=", ">", "[", "]", "{", "}", ".", ",", ";", "'", "\""}
