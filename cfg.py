@@ -1,13 +1,13 @@
 #!/bin/python3.5
 import sys
-from Analyzer import *
+from Grammar import *
 from NDFA import *
 
 def main(argv):
     # The with statement allows objects like files to be used in a way
     # that ensures they are always cleaned up promptly and correctly.
     with open(argv[1], 'r') as f:
-        a = Analyzer()
+        a = Grammar()
         a.readgr(f)
         print("Special states:")
         print(a.asterisk)
@@ -16,7 +16,7 @@ def main(argv):
         print("\nGrammar:")
         a.printgr()
         print("---------------------")
-        b = NDFA(a.grammar, a.asterisk)
+        b = NDFA().builtWith(a)
         print("---------------------")
         b.printndfa()
 

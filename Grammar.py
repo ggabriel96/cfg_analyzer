@@ -2,10 +2,10 @@ from const import *
 from Symbol import *
 from GrammarError import *
 
-class Analyzer():
+class Grammar():
     def __init__(self, verbose = False):
         # https://docs.python.org/3/library/stdtypes.html#dict
-        self.grammar = {}
+        self.rules = {}
         # https://docs.python.org/3/library/stdtypes.html#set
         self.asterisk = set()
         self.ignore = set()
@@ -37,13 +37,13 @@ class Analyzer():
                 elif state == SEEK_RULE_NAME:
                     if c == '>':
                         if rulename != "":
-                            if rulename in self.grammar:
+                            if rulename in self.rules:
                                 raise GrammarError(DUPLICATED_RULE, i)
                             if special:
                                 self.asterisk.add(rulename)
                             elif ignore:
                                 self.ignore.add(rulename)
-                            self.grammar[rulename] = list()
+                            self.rules[rulename] = list()
                             state = SEEK_ST_COLON
 
                             if self.verbose:
@@ -123,14 +123,14 @@ class Analyzer():
                         symbol = str()
                         state = SEEK_NTERM
                     elif c == '|':
-                        self.grammar[rulename].append(production)
+                        self.rules[rulename].append(production)
                         production = list()
                         state = SEEK_ST_PROD
 
                         if self.verbose:
                             print("End of production")
                     elif c == '\n':
-                        self.grammar[rulename].append(production)
+                        self.rules[rulename].append(production)
                         state = SEEK_RULE
 
                         if self.verbose:
@@ -171,7 +171,7 @@ class Analyzer():
             line = grammarFile.readline()
 
     def printgr(self):
-        for rule, productions in self.grammar.items():
+        for rule, productions in self.rules.items():
             print("<{}> ::= ".format(rule), end = "")
             for production in productions:
                 for symbol in production:
