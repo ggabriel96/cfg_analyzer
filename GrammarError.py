@@ -1,4 +1,4 @@
-from consts import *
+from const import *
 
 class GrammarError(Exception):
     def __init__(self, code, lineNumber = None, message = None):

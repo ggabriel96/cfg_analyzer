@@ -2,7 +2,7 @@ class NDFA():
     def __init__(self, grammar, asterisk):
         self.dfa = None
         self.ndfa = [{}, {}] #Inicializo já os dois primeiros estados, por causa da forma como faço
-        self.code = {}
+        self.encode = {}
         self.decode = {}
         self.build(grammar, asterisk)
 
@@ -14,8 +14,8 @@ class NDFA():
                 continue
             for production in productions:
                 for symbol in production:
-                    if symbol.isterm and symbol.name not in self.code and symbol.name != "":
-                        self.code[symbol.name] = cont
+                    if symbol.isterm and symbol.name not in self.encode and symbol.name != "":
+                        self.encode[symbol.name] = cont
                         self.decode[cont] = symbol.name
                         first = True
                         for c in symbol.name:

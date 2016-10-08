@@ -1,4 +1,4 @@
-from consts import *
+from const import *
 from Symbol import *
 from GrammarError import *
 
