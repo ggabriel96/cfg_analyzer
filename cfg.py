@@ -11,12 +11,14 @@ def main(argv):
         a.readgr(f)
         print("Special states:")
         print(a.asterisk)
+        print("Special states children:")
+        print(a.ignore)
         print("\nGrammar:")
         a.printgr()
-        print("---------------------")
-        b = NDFA.NDFA(a.grammar, a.asterisk)
-        print("---------------------")
-        b.printndfa()
+        # print("---------------------")
+        # b = NDFA.NDFA(a.grammar, a.asterisk)
+        # print("---------------------")
+        # b.printndfa()
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:

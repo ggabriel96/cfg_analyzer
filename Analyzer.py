@@ -8,6 +8,7 @@ class Analyzer():
         self.grammar = {}
         # https://docs.python.org/3/library/stdtypes.html#set
         self.asterisk = set()
+        self.ignore = set()
         self.finals = set()
         self.verbose = verbose
 
@@ -18,6 +19,7 @@ class Analyzer():
         while (line != ""):
             symbol = None
             special = False
+            ignore = False
             rulename = str()
             production = None
             for c in line:
@@ -28,6 +30,8 @@ class Analyzer():
                         state = SEEK_RULE_NAME
                     elif c == '*':
                         special = True
+                    elif c == '+':
+                        ignore = True
                     else:
                         raise GrammarError(EXPECTED_LT, i)
                 elif state == SEEK_RULE_NAME:
@@ -37,6 +41,8 @@ class Analyzer():
                                 raise GrammarError(DUPLICATED_RULE, i)
                             if special:
                                 self.asterisk.add(rulename)
+                            elif ignore:
+                                self.ignore.add(rulename)
                             self.grammar[rulename] = list()
                             state = SEEK_ST_COLON
 

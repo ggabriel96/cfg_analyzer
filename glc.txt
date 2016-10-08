@@ -4,10 +4,10 @@
 <if'> ::= <line> | "{" <lines> "}" <else>
 <else> ::= "else" <else'> | ""
 <else'> ::= <line> | "{" <lines> "}"
-<for> ::= "for" "(" <for'> ";" <for_condition> ";" <for'> ")" <for'>
+<for> ::= "for" "(" <for'> ";" <for_condition> ";" <for'> ")" <for''>
 <for'> ::= <assignment_list> | ""
 <for_condition> ::= <expression> | ""
-<for'> ::= <line> | "{" <lines> "}"
+<for''> ::= <line> | "{" <lines> "}"
 <while> ::= "while" "(" <expression> ")" <while'>
 <while'> ::= <line> | "{" <lines> "}"
 <declaration> ::= "let" <declaration_list> ";"
