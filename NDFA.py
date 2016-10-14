@@ -1,9 +1,8 @@
 class NDFA():
     def __init__(self):
         self.dfa = None
-        self.ndfa = [{}, {}] # Inicializo já os dois primeiros estados, por causa da forma como faço
-        self.encode = {}
-        self.decode = {}
+        self.ndfa = [{}] # Inicializo já os dois primeiros estados, por causa da forma como faço
+        self.labels = {}
 
     @classmethod
     def builtWith(cls, grammar):
@@ -12,37 +11,39 @@ class NDFA():
         return self
 
     def build(self, grammar):
-        state = 1
         terminal_number = 0
         for rule, productions in grammar.rules.items():
-            if rule in grammar.asterisk:
+            if rule in grammar.asterisk or rule in grammar.ignore:
                 continue
+            final = None
             for production in productions:
                 for symbol in production:
-                    if symbol.isterm and symbol.name not in self.encode and symbol.name != "":
-                        first = True
-                        self.encode[symbol.name] = terminal_number
-                        self.decode[terminal_number] = symbol.name
-                        for c in symbol.name:
-                            if first:
-                                if ord(c) not in self.ndfa[0]:
-                                    self.ndfa[0][ord(c)] = []
-                                # self.ndfa.append({})
-                                self.ndfa[0][ord(c)].append(state)
-                                # state += 1
-                                first = False
+                    if symbol.isterm and symbol.name != "":
+                        if final == None:
+                            final = len(self.ndfa)
+                            self.ndfa.append({})
+                            self.labels[final] = rule
+                            # print("final: {}".format(rule))
+                        state = 0
+                        for i, c in enumerate(symbol.name):
+                            # print("{}: {}".format(c, ord(c)))
+                            if i == len(symbol.name) - 1:
+                                if ord(c) not in self.ndfa[state]:
+                                    self.ndfa[state][ord(c)] = [ final ]
+                                else:
+                                    self.ndfa[state][ord(c)].append(final)
                             else:
+                                prox = len(self.ndfa)
                                 self.ndfa.append({})
-                                self.ndfa[state][ord(c)] = state + 1
-                                state += 1
-                        self.ndfa.append({}) # É o estado final de reconhecimento do token
-                        state += 1
-                        terminal_number += 1
+                                if ord(c) not in self.ndfa[state]:
+                                    self.ndfa[state][ord(c)] = [ prox ]
+                                else:
+                                    self.ndfa[state][ord(c)].append(prox)
+                                state = prox
 
     def printndfa(self):
-        print(self.decode)
         print("<=========>")
-        print(self.ndfa)
+        #print(self.ndfa)
         for i in range(len(self.ndfa)):
             print("State #{}: ".format(i))
             # print(self.ndfa[i]);
