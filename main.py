@@ -19,6 +19,7 @@ def main(argv):
         b = NDFA().builtWith(a)
         print("---------------------")
         b.printndfa()
+        b.printlab()
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:

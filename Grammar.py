@@ -1,11 +1,12 @@
 from const import *
 from Symbol import *
 from GrammarError import *
+from collections import OrderedDict
 
 class Grammar():
     def __init__(self, verbose = False):
         # https://docs.python.org/3/library/stdtypes.html#dict
-        self.rules = {}
+        self.rules = OrderedDict()
         # https://docs.python.org/3/library/stdtypes.html#set
         self.asterisk = set()
         self.ignore = set()

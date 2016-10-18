@@ -11,6 +11,11 @@ SEEK_PROD = 10
 SEEK_TERM = 11
 SEEK_NTERM = 12
 SEEK_ESC = 13
+
+SEEK_SPECIAL_TERM = 14
+SEEK_SPECIAL_NTERM = 15
+SEEK_SPECIAL_DONE = 16
+
 EXPECTED_LT = -1
 EMPTY_RULENAME = -2
 LT_FOBIDDEN = -3
@@ -20,5 +25,7 @@ EMPY_PRODUCTION = -6
 INVALID_TOKEN = -7
 INVALID_ESCAPE = -8
 DUPLICATED_RULE = -9
+INVALID_REGULAR = -10
+PLUS_BEFORE = -11
 
 separators = {" ", "(", ")", "+", "-", "*", "/", "%", "^", "?", ":", "<", "=", ">", "[", "]", "{", "}", ".", ",", ";", "'", "\""}
