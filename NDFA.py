@@ -5,7 +5,7 @@ from collections import OrderedDict
 class NDFA():
     def __init__(self):
         self.dfa = None
-        self.ndfa = [OrderedDict()] # Inicializo já os dois primeiros estados, por causa da forma como faço
+        self.ndfa = [OrderedDict()]
         self.labels = {}
 
     @classmethod
@@ -13,6 +13,28 @@ class NDFA():
         self = cls()
         self.build(grammar)
         return self
+
+    def eps_closure(self, state):
+        stack = [ state ]
+        closure = {state}
+        while len(stack) > 0:
+            t = stack.pop()
+            if 0 in self.ndfa[t]:
+                for s in self.ndfa[t][0]:
+                    stack.append(s)
+                    closure.add(s)
+        return closure
+
+    def eps_closure_set(self, state_set):
+        closure_set = set()
+        for state in state_set:
+            closure = self.eps_closure(state)
+            for cl in closure:
+                closure_set.add(cl)
+        return closure_set
+
+    def to_dfa(self):
+        print(self.eps_closure_set({6, 9}))
 
     def build(self, grammar):
         encode = {}
