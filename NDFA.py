@@ -1,11 +1,14 @@
+from DFA import *
 from const import *
 from GrammarError import *
 from collections import OrderedDict
 
 class NDFA():
     def __init__(self):
-        self.dfa = None
-        self.ndfa = [OrderedDict()]
+        # the first-level array holds the states (lines of table)
+        # each position in it holds an OrderedDict, which maps
+        # a char to destination states (an array)
+        self.table = [ OrderedDict() ]
         self.labels = {}
 
     @classmethod
@@ -16,25 +19,73 @@ class NDFA():
 
     def eps_closure(self, state):
         stack = [ state ]
-        closure = {state}
+        closure = { state }
         while len(stack) > 0:
             t = stack.pop()
-            if 0 in self.ndfa[t]:
-                for s in self.ndfa[t][0]:
+            if 0 in self.table[t]:
+                for s in self.table[t][0]:
                     stack.append(s)
                     closure.add(s)
         return closure
 
-    def eps_closure_set(self, state_set):
+    def eps_closure_set(self, state_set_list):
         closure_set = set()
-        for state in state_set:
+        for state_list in state_set_list:
+            for state in state_list:
+                closure = self.eps_closure(state)
+                for cl in closure:
+                    closure_set.add(cl)
+        return closure_set
+
+    def eps_closure_list(self, state_list):
+        closure_set = set()
+        for state in state_list:
             closure = self.eps_closure(state)
             for cl in closure:
                 closure_set.add(cl)
         return closure_set
 
     def to_dfa(self):
-        print(self.eps_closure_set({6, 9}))
+        dfa = DFA()
+        encode = {}
+        decode = {}
+        encoding = 0
+        closure = frozenset(self.eps_closure_set(self.table[0].values()))
+        encode[closure] = encoded_cl = encoding; encoding += 1
+        decode[0] = closure
+        dstates = { encoded_cl }
+        unmarked = { encoded_cl }
+        while len(unmarked) > 0:
+            rule = unmarked.pop()
+            for char in range(UNICODE_LATIN_START, UNICODE_LATIN_END):
+                closure = set()
+                for nstate in decode[rule]:
+                    if char in self.table[nstate]:
+                        for clstate in self.eps_closure_list(self.table[nstate][char]):
+                            closure.add(clstate)
+                if len(closure) > 0:
+                    closure = frozenset(closure)
+                    if closure not in encode:
+                        encode[closure] = encoded_cl = encoding
+                        if encoding >= len(dfa.table):
+                            dfa.table.append(OrderedDict())
+                        encoding += 1
+                        decode[encoded_cl] = closure
+                    else:
+                        encoded_cl = encode[closure]
+                    if encoded_cl not in dstates:
+                        dstates.add(encoded_cl)
+                        unmarked.add(encoded_cl)
+                    if rule >= len(dfa.table):
+                        dfa.table.append(OrderedDict())
+                    dfa.table[rule][char] = encoded_cl
+        for dstate in range(len(dfa.table)):
+            for nstate in decode[dstate]:
+                if nstate in self.labels:
+                    dfa.finals.add(dstate)
+                    break
+        print("\nDFA final states: {}\n".format(dfa.finals))
+        return dfa
 
     def build(self, grammar):
         encode = {}
@@ -45,13 +96,13 @@ class NDFA():
             if rule in grammar.asterisk or rule in grammar.ignore:
                 if rule in grammar.asterisk:
                     state = 0
-                    finalname[rule] = len(self.ndfa)
+                    finalname[rule] = len(self.table)
                     self.labels[finalname[rule]] = rule
-                    self.ndfa.append(OrderedDict())
+                    self.table.append(OrderedDict())
                 else:
                     if rule not in encode:
-                        state = encode[rule] = len(self.ndfa)
-                        self.ndfa.append(OrderedDict())
+                        state = encode[rule] = len(self.table)
+                        self.table.append(OrderedDict())
                     else:
                         state = encode[rule]
                 for production in productions:
@@ -71,14 +122,14 @@ class NDFA():
                                     raise GrammarError.withMessage(PLUS_BEFORE, "'{}'".format(rule))
                                 finalname[symbol.name] = finalname[rule]
                                 if symbol.name not in encode:
-                                    encode[symbol.name] = len(self.ndfa)
-                                    self.ndfa.append(OrderedDict())
+                                    encode[symbol.name] = len(self.table)
+                                    self.table.append(OrderedDict())
 
                                 ordsym = ord(trans_sym.name) if trans_sym.name != "" else 0;
-                                if ordsym not in self.ndfa[state]:
-                                    self.ndfa[state][ordsym] = [ encode[symbol.name] ]
+                                if ordsym not in self.table[state]:
+                                    self.table[state][ordsym] = [ encode[symbol.name] ]
                                 else:
-                                    self.ndfa[state][ordsym].append(encode[symbol.name])
+                                    self.table[state][ordsym].append(encode[symbol.name])
                                 machine_state = SEEK_SPECIAL_DONE
                             else:
                                 raise GrammarError.withMessage(INVALID_REGULAR, "'{}'".format(rule))
@@ -87,49 +138,48 @@ class NDFA():
                             if rule not in finalname:
                                 raise GrammarError.withMessage(PLUS_BEFORE, "'{}'".format(rule))
                             ordsym = ord(symbol.name) if symbol.name != "" else 0;
-                            if ordsym not in self.ndfa[state]:
-                                self.ndfa[state][ordsym] = [ finalname[rule] ]
+                            if ordsym not in self.table[state]:
+                                self.table[state][ordsym] = [ finalname[rule] ]
                             else:
-                                self.ndfa[state][ordsym].append(finalname[rule])
+                                self.table[state][ordsym].append(finalname[rule])
             else:
                 final = None
                 for production in productions:
                     for symbol in production:
                         if symbol.isterm and symbol.name != "":
                             if final == None:
-                                final = len(self.ndfa)
-                                self.ndfa.append(OrderedDict())
+                                final = len(self.table)
+                                self.table.append(OrderedDict())
                                 self.labels[final] = rule
                                 # print("final: {}".format(rule))
                             state = 0
                             for i, c in enumerate(symbol.name):
                                 # print("{}: {}".format(c, ord(c)))
                                 if i == len(symbol.name) - 1:
-                                    if ord(c) not in self.ndfa[state]:
-                                        self.ndfa[state][ord(c)] = [ final ]
+                                    if ord(c) not in self.table[state]:
+                                        self.table[state][ord(c)] = [ final ]
                                     else:
-                                        self.ndfa[state][ord(c)].append(final)
+                                        self.table[state][ord(c)].append(final)
                                 else:
-                                    prox = len(self.ndfa)
-                                    self.ndfa.append(OrderedDict())
-                                    if ord(c) not in self.ndfa[state]:
-                                        self.ndfa[state][ord(c)] = [ prox ]
+                                    prox = len(self.table)
+                                    self.table.append(OrderedDict())
+                                    if ord(c) not in self.table[state]:
+                                        self.table[state][ord(c)] = [ prox ]
                                     else:
-                                        self.ndfa[state][ord(c)].append(prox)
+                                        self.table[state][ord(c)].append(prox)
                                     state = prox
 
 
     def printndfa(self):
         print("<=========>")
-        #print(self.ndfa)
-        for i in range(len(self.ndfa)):
+        for i in range(len(self.table)):
             print("State #{}: ".format(i))
-            # print(self.ndfa[i]);
-            for char, estado in self.ndfa[i].items():
+            for char, estado in self.table[i].items():
                 print("Caracter \'{}\' vai para estado {}".format(chr(char), estado))
             print()
 
     def printlab(self):
         print("\n\nLabels:")
-        for k in self.labels:
-            print(k)
+        print(self.labels)
+        # for k in self.labels:
+            # print(k)

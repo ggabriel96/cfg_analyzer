@@ -2,6 +2,7 @@
 import sys
 from Grammar import *
 from NDFA import *
+from DFA import *
 
 def main(argv):
     # The with statement allows objects like files to be used in a way
@@ -20,7 +21,9 @@ def main(argv):
         print("---------------------")
         b.printndfa()
         b.printlab()
-        b.to_dfa()
+        c = b.to_dfa()
+        # c.printdfa()
+        print(c.to_csv())
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
