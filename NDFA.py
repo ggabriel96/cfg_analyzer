@@ -57,6 +57,9 @@ class NDFA():
         unmarked = { encoded_cl }
         while len(unmarked) > 0:
             rule = unmarked.pop()
+            # https://docs.python.org/3/tutorial/datastructures.html
+            # x = [ 0 ].extend(list(range(UNICODE_LATIN_START, UNICODE_LATIN_END)));
+            # we are not looking at epsilon (because eps is 0, is out of this range)
             for char in range(UNICODE_LATIN_START, UNICODE_LATIN_END):
                 closure = set()
                 for nstate in decode[rule]:
