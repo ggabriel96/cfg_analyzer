@@ -19,10 +19,12 @@ def main(argv):
         print("---------------------")
         b = NDFA().builtWith(a)
         print("---------------------")
-        b.printndfa()
-        b.printlab()
+        print("printndfa:"); b.printndfa()
+        print("ndfa final states:"); b.printlab()
+        print("---------------------")
         c = b.to_dfa()
-        # c.printdfa()
+        c.printdfa()
+        print("\nDFA final states: {}\n".format(c.finals))
         print(c.to_csv())
 
 if __name__ == "__main__":

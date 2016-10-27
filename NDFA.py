@@ -45,7 +45,62 @@ class NDFA():
                 closure_set.add(cl)
         return closure_set
 
+    def printndfa(self):
+        print("<=========>")
+        for i in range(len(self.table)):
+            print("State #{}: ".format(i))
+            for char, estado in self.table[i].items():
+                print("Caracter \'{}\' vai para estado {}".format(chr(char), estado))
+            print()
+
+    def is_final(self, frozen_dstate):
+        for dstate in frozen_dstate:
+            if dstate in self.labels:
+                return True
+        return False
+
+    def frozenstr(self, frozen_set):
+        string = "("
+        for item in frozen_set:
+            string += "[" + str(item) + "]"
+        return string + ")"
+
     def to_dfa(self):
+        done = set()
+        dfa = DFA()
+        init_nstate = frozenset({0})
+        nstates = [ init_nstate ]
+        encode = { init_nstate: 0 }
+        encoding = 1
+        while len(nstates) > 0:
+            nstate = nstates.pop()
+            if nstate in done:
+                continue
+            done.add(nstate)
+            print("\nMaking state {} deterministic...".format(self.frozenstr(nstate)))
+            for char in list(range(UNICODE_LATIN_START, UNICODE_LATIN_END)):
+                dstate = set()
+                for ns in nstate:
+                    if char in self.table[ns]:
+                        print("Through char '{}'...".format(chr(char)))
+                        for t in self.table[ns][char]:
+                            print("Target '{}'".format(t))
+                            dstate.add(t)
+                if len(dstate) > 0:
+                    frozen_dstate = frozenset(dstate)
+                    nstates.append(frozen_dstate)
+                    if frozen_dstate not in encode:
+                        encode[frozen_dstate] = encoding
+                        if encoding >= len(dfa.table):
+                            dfa.table.append(OrderedDict())
+                        encoding += 1
+                    print("dstate: {}, encoded: {}".format(self.frozenstr(frozen_dstate), encode[frozen_dstate]))
+                    dfa.table[encode[nstate]][char] = encode[frozen_dstate]
+                    if self.is_final(frozen_dstate):
+                        dfa.finals.add(encode[frozen_dstate])
+        return dfa
+
+    def to_dfa_hopcroft(self):
         dfa = DFA()
         encode = {}
         decode = {}
@@ -57,10 +112,7 @@ class NDFA():
         unmarked = { encoded_cl }
         while len(unmarked) > 0:
             rule = unmarked.pop()
-            # https://docs.python.org/3/tutorial/datastructures.html
-            # x = [ 0 ].extend(list(range(UNICODE_LATIN_START, UNICODE_LATIN_END)));
-            # we are not looking at epsilon (because eps is 0, is out of this range)
-            for char in range(UNICODE_LATIN_START, UNICODE_LATIN_END):
+            for char in list(range(UNICODE_LATIN_START, UNICODE_LATIN_END)):
                 closure = set()
                 for nstate in decode[rule]:
                     if char in self.table[nstate]:
@@ -87,7 +139,6 @@ class NDFA():
                 if nstate in self.labels:
                     dfa.finals.add(dstate)
                     break
-        print("\nDFA final states: {}\n".format(dfa.finals))
         return dfa
 
     def build(self, grammar):
