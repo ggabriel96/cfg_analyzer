@@ -15,6 +15,11 @@ class DFA():
                 print("Caracter \'{}\' vai para estado {}".format(chr(char), estado))
             print()
 
+    def is_final(self, state):
+        if state in self.finals:
+            return True
+        return False
+
     def to_csv(self):
         csv = ", eps"
         for char in range(UNICODE_LATIN_START, UNICODE_LATIN_END):

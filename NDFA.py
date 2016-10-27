@@ -17,34 +17,6 @@ class NDFA():
         self.build(grammar)
         return self
 
-    def eps_closure(self, state):
-        stack = [ state ]
-        closure = { state }
-        while len(stack) > 0:
-            t = stack.pop()
-            if 0 in self.table[t]:
-                for s in self.table[t][0]:
-                    stack.append(s)
-                    closure.add(s)
-        return closure
-
-    def eps_closure_set(self, state_set_list):
-        closure_set = set()
-        for state_list in state_set_list:
-            for state in state_list:
-                closure = self.eps_closure(state)
-                for cl in closure:
-                    closure_set.add(cl)
-        return closure_set
-
-    def eps_closure_list(self, state_list):
-        closure_set = set()
-        for state in state_list:
-            closure = self.eps_closure(state)
-            for cl in closure:
-                closure_set.add(cl)
-        return closure_set
-
     def printndfa(self):
         print("<=========>")
         for i in range(len(self.table)):
@@ -98,48 +70,29 @@ class NDFA():
                     dfa.table[encode[nstate]][char] = encode[frozen_dstate]
                     if self.is_final(frozen_dstate):
                         dfa.finals.add(encode[frozen_dstate])
+        return self.minimize(dfa)
+
+    def doesnt_reach_final(self, dfa, state):
+        doesnt = True
+        stack = [ state ]
+        visited = set()
+        while len(stack) > 0:
+            s = stack.pop()
+            if s in visited:
+                continue;
+            visited.add(s)
+            doesnt = doesnt and not dfa.is_final(s)
+            for char in list(range(UNICODE_LATIN_START, UNICODE_LATIN_END)):
+                if char in dfa.table[s]:
+                    stack.append(dfa.table[s][char])
+                    doesnt = doesnt and not dfa.is_final(dfa.table[s][char])
+        return doesnt
+
+    def minimize(self, dfa):
+        for state in range(len(dfa.table)):
+            print(state, self.doesnt_reach_final(dfa, state))
         return dfa
 
-    def to_dfa_hopcroft(self):
-        dfa = DFA()
-        encode = {}
-        decode = {}
-        encoding = 0
-        closure = frozenset(self.eps_closure_set(self.table[0].values()))
-        encode[closure] = encoded_cl = encoding; encoding += 1
-        decode[0] = closure
-        dstates = { encoded_cl }
-        unmarked = { encoded_cl }
-        while len(unmarked) > 0:
-            rule = unmarked.pop()
-            for char in list(range(UNICODE_LATIN_START, UNICODE_LATIN_END)):
-                closure = set()
-                for nstate in decode[rule]:
-                    if char in self.table[nstate]:
-                        for clstate in self.eps_closure_list(self.table[nstate][char]):
-                            closure.add(clstate)
-                if len(closure) > 0:
-                    closure = frozenset(closure)
-                    if closure not in encode:
-                        encode[closure] = encoded_cl = encoding
-                        if encoding >= len(dfa.table):
-                            dfa.table.append(OrderedDict())
-                        encoding += 1
-                        decode[encoded_cl] = closure
-                    else:
-                        encoded_cl = encode[closure]
-                    if encoded_cl not in dstates:
-                        dstates.add(encoded_cl)
-                        unmarked.add(encoded_cl)
-                    if rule >= len(dfa.table):
-                        dfa.table.append(OrderedDict())
-                    dfa.table[rule][char] = encoded_cl
-        for dstate in range(len(dfa.table)):
-            for nstate in decode[dstate]:
-                if nstate in self.labels:
-                    dfa.finals.add(dstate)
-                    break
-        return dfa
 
     def build(self, grammar):
         encode = {}
