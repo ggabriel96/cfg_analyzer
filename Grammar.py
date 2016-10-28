@@ -17,7 +17,7 @@ class Grammar():
         i = 1
         state = SEEK_RULE
         line = grammarFile.readline()
-        while (line != ""):
+        while line != "":
             symbol = None
             special = False
             ignore = False

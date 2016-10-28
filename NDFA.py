@@ -9,7 +9,7 @@ class NDFA():
         # each position in it holds an OrderedDict, which maps
         # a char to destination states (an array)
         self.table = [ OrderedDict() ]
-        self.labels = {}
+        self.finals = set()
 
     @classmethod
     def builtWith(cls, grammar):
@@ -27,7 +27,7 @@ class NDFA():
 
     def is_final(self, frozen_dstate):
         for dstate in frozen_dstate:
-            if dstate in self.labels:
+            if dstate in self.finals:
                 return True
         return False
 
@@ -70,7 +70,8 @@ class NDFA():
                     dfa.table[encode[nstate]][char] = encode[frozen_dstate]
                     if self.is_final(frozen_dstate):
                         dfa.finals.add(encode[frozen_dstate])
-        return self.minimize(dfa)
+        return dfa
+        # return self.minimize(dfa)
 
     def doesnt_reach_final(self, dfa, state):
         doesnt = True
@@ -93,6 +94,13 @@ class NDFA():
             print(state, self.doesnt_reach_final(dfa, state))
         return dfa
 
+    def fix_eps(self):
+        ##------------------
+        for i in range(len(self.table)):
+            if EPSILON in self.table[i]:
+                self.finals.add(i)
+                del self.table[i][EPSILON]
+                print("eps removed from state {}".format(i))
 
     def build(self, grammar):
         encode = {}
@@ -104,7 +112,7 @@ class NDFA():
                 if rule in grammar.asterisk:
                     state = 0
                     finalname[rule] = len(self.table)
-                    self.labels[finalname[rule]] = rule
+                    self.finals.add(finalname[rule])
                     self.table.append(OrderedDict())
                 else:
                     if rule not in encode:
@@ -132,7 +140,7 @@ class NDFA():
                                     encode[symbol.name] = len(self.table)
                                     self.table.append(OrderedDict())
 
-                                ordsym = ord(trans_sym.name) if trans_sym.name != "" else 0;
+                                ordsym = ord(trans_sym.name) if trans_sym.name != "" else EPSILON;
                                 if ordsym not in self.table[state]:
                                     self.table[state][ordsym] = [ encode[symbol.name] ]
                                 else:
@@ -144,7 +152,7 @@ class NDFA():
                         if machine_state == SEEK_SPECIAL_NTERM:
                             if rule not in finalname:
                                 raise GrammarError.withMessage(PLUS_BEFORE, "'{}'".format(rule))
-                            ordsym = ord(symbol.name) if symbol.name != "" else 0;
+                            ordsym = ord(symbol.name) if symbol.name != "" else EPSILON;
                             if ordsym not in self.table[state]:
                                 self.table[state][ordsym] = [ finalname[rule] ]
                             else:
@@ -157,7 +165,7 @@ class NDFA():
                             if final == None:
                                 final = len(self.table)
                                 self.table.append(OrderedDict())
-                                self.labels[final] = rule
+                                self.finals.add(final)
                                 # print("final: {}".format(rule))
                             state = 0
                             for i, c in enumerate(symbol.name):
@@ -175,7 +183,7 @@ class NDFA():
                                     else:
                                         self.table[state][ord(c)].append(prox)
                                     state = prox
-
+        self.fix_eps()
 
     def printndfa(self):
         print("<=========>")
@@ -185,8 +193,24 @@ class NDFA():
                 print("Caracter \'{}\' vai para estado {}".format(chr(char), estado))
             print()
 
-    def printlab(self):
-        print("\n\nLabels:")
-        print(self.labels)
-        # for k in self.labels:
-            # print(k)
+    def to_csv(self):
+        csv = str()
+        for char in range(UNICODE_LATIN_START, UNICODE_LATIN_END):
+            csv += ", "
+            c = chr(char)
+            if c == '"':
+                csv += "\"\"\"\""
+            elif c == ',':
+                csv += "\",\""
+            else:
+                csv += "{}".format(c)
+        for state, rule in enumerate(self.table):
+            csv += "\n{}".format(state)
+            for char in range(UNICODE_LATIN_START, UNICODE_LATIN_END):
+                csv += ", {"
+                if char in rule:
+                    for target in rule[char]:
+                        csv += "[{}]".format(target)
+                csv += "}"
+        csv += "\n"
+        return csv

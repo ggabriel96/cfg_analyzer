@@ -1,3 +1,4 @@
+EPSILON = 0
 UNICODE_LATIN_START = 32
 UNICODE_LATIN_END = 127
 
@@ -30,5 +31,3 @@ INVALID_ESCAPE = -8
 DUPLICATED_RULE = -9
 INVALID_REGULAR = -10
 PLUS_BEFORE = -11
-
-separators = {" ", "(", ")", "+", "-", "*", "/", "%", "^", "?", ":", "<", "=", ">", "[", "]", "{", "}", ".", ",", ";", "'", "\""}

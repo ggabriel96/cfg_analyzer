@@ -34,7 +34,7 @@ class DFA():
                 csv += "{}".format(c)
         for state, rule in enumerate(self.table):
             csv += "\n{}".format(state)
-            csv += ", {}".format(rule[0] if 0 in rule else "X")
+            csv += ", {}".format(rule[EPSILON] if EPSILON in rule else "X")
             for char in range(UNICODE_LATIN_START, UNICODE_LATIN_END):
                 if char < UNICODE_LATIN_END:
                     csv += ", "
