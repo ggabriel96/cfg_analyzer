@@ -71,31 +71,8 @@ class NDFA():
                     if self.is_final(frozen_dstate):
                         dfa.finals.add(encode[frozen_dstate])
         return dfa
-        # return self.minimize(dfa)
-
-    def doesnt_reach_final(self, dfa, state):
-        doesnt = True
-        stack = [ state ]
-        visited = set()
-        while len(stack) > 0:
-            s = stack.pop()
-            if s in visited:
-                continue;
-            visited.add(s)
-            doesnt = doesnt and not dfa.is_final(s)
-            for char in list(range(UNICODE_LATIN_START, UNICODE_LATIN_END)):
-                if char in dfa.table[s]:
-                    stack.append(dfa.table[s][char])
-                    doesnt = doesnt and not dfa.is_final(dfa.table[s][char])
-        return doesnt
-
-    def minimize(self, dfa):
-        for state in range(len(dfa.table)):
-            print(state, self.doesnt_reach_final(dfa, state))
-        return dfa
 
     def fix_eps(self):
-        ##------------------
         for i in range(len(self.table)):
             if EPSILON in self.table[i]:
                 self.finals.add(i)
