@@ -18,11 +18,12 @@ class Parser():
         newline = ""
         for char in line:
             if state == CHAR:
-                if char == ' ':
-                    continue
+                # if char == ' ':
+                    # continue
                     # newline += chr(1)
                     # state = CHAR2
-                elif char == '"':
+                # elif char == '"':
+                if char == '"':
                     newline += char
                     state = QUOTE
                 else:
@@ -59,30 +60,62 @@ class Parser():
             wasFinal = False
             while caret < len(line):
                 char = line[caret]
+                # spaces just matter inside strings, so it's
+                # safe to ignore them while in initial state
+                if char == ' ' and current_state == 0:
+                    caret += 1
+                    continue
                 c = ord(char)
-                print("current_state: {}\nchar '{}': {}".format(current_state, char if char != '\n' else "\\n", c))
+                print("\n({}, '{}')".format(current_state, char if char != '\n' else "\\n"))
                 token_end += 1
                 if char in self.separators:
-                    print("in separators")
+                    print("'{}' is a separator".format(char if char != '\n' else "\\n"))
+                    # if we're not at a final state and there is no mapping for
+                    # this char in the current state, then we found an error
                     if current_state not in self.dfa.finals and c not in self.dfa.table[current_state]:
                         raise LexicalError(INVALID_TOKEN, i, "'{}'".format(line[token_start:token_end]))
-                    if c not in self.dfa.table[current_state] or wasFinal:
+                    # but if we're at a final state and still there's no mapping
+                    # we simply reached a final state of a separator
+                    if c not in self.dfa.table[current_state]:
                         self.output.append(current_state)
+                        print("self.output: {}".format(self.output))
                         token_start = token_end
                         if c in self.dfa.table[0]:
-                            print("isFinal\ntransition from {} to {} through '{}'".format(current_state, self.dfa.table[0][c], char))
+                            print("Separator has mapping on initial state: (0, '{}') -> {}".format(char, self.dfa.table[0][c]))
                             current_state = self.dfa.table[0][c]
                             wasFinal = True
                             caret += 1
                         else:
-                            print("reset")
+                            print("No mapping on initial state: simply resetting...")
                             current_state = 0
                             if char == '\n':
                                 caret += 1
-                        print("output: {}\n\n".format(self.output))
+                        # print("Resetting...")
+                        # current_state = 0
+                        # if char == '\n':
+                        #     caret += 1
                         continue
+                    if current_state == 0 or wasFinal:
+                        print("Initial state or wasFinal is True: ({}, '{}') -> {}".format(current_state, char, self.dfa.table[current_state][c]))
+                        current_state = self.dfa.table[current_state][c]
+                        # wasFinal was not necessarily True to enter this if
+                        wasFinal = True
+                        caret += 1
+                        continue
+                    # elif wasFinal:
+                        # print("wasFinal transition from {} to {} through '{}'".format(current_state, self.dfa.table[current_state][c], char))
+                        # current_state = self.dfa.table[current_state][c]
+                        # caret += 1
+                        # continue
+                        # self.output.append(self.dfa.table[current_state][c])
+                        # token_start = token_end
+                        # current_state = 0
+                        # wasFinal = False
+                        # caret += 1
+                        # continue
+                # if we're not looking at a separator and there's a mapping for it in the current state...
                 if c in self.dfa.table[current_state]:
-                    print("transition from {} to {} through '{}'".format(current_state, self.dfa.table[current_state][c], char))
+                    print("({}, '{}') -> {}".format(current_state, char, self.dfa.table[current_state][c]))
                     current_state = self.dfa.table[current_state][c]
                 elif wasFinal == True and c in self.dfa.table[0]:
                     print("wasFinal")
@@ -91,7 +124,7 @@ class Parser():
                 else:
                     raise LexicalError(INVALID_TOKEN, i, "'{}' not mapped on state {}".format(char, current_state))
                 wasFinal = False
-                print("output: {}\n\n".format(self.output))
+                print("self.output: {}\n".format(self.output))
                 caret += 1
             i += 1
             line = file.readline()
