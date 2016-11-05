@@ -5,6 +5,7 @@
 <comma> ::= ","
 <semicolon> ::= ";"
 <not> ::= "!"
+<equal> ::= "="
 <lines> ::= <line><lines> | ""
 <line> ::= <if> | <for> | <while> | <declaration> | <variable_assignment>
 <if> ::= "if" <lpar> <expression> <rpar> <if'>
@@ -24,7 +25,7 @@
 <variable_assignment> ::= <assignment_list> <semicolon>
 <assignment_list> ::= <variable><assignment><assignment_list'>
 <assignment_list'> ::= <comma> <assignment_list> | ""
-<assignment> ::= "=" <expression>
+<assignment> ::= <equal> <expression>
 <expression> ::= <lpar> <expression> <rpar> <expression'> | <not> <expression><expression'> | <operand><expression'>
 <expression'> ::= <operator><expression><expression'> | ""
 *<variable> ::= "a" <variable'> | "b" <variable'> | "c" <variable'> | "d" <variable'> | "e" <variable'> | "f" <variable'> | "g" <variable'> | "h" <variable'> | "i" <variable'> | "j" <variable'> | "k" <variable'> | "l" <variable'> | "m" <variable'> | "n" <variable'> | "o" <variable'> | "p" <variable'> | "q" <variable'> | "r" <variable'> | "s" <variable'> | "t" <variable'> | "u" <variable'> | "v" <variable'> | "w" <variable'> | "x" <variable'> | "y" <variable'> | "z" <variable'> | "A" <variable'> | "B" <variable'> | "C" <variable'> | "D" <variable'> | "E" <variable'> | "F" <variable'> | "G" <variable'> | "H" <variable'> | "I" <variable'> | "J" <variable'> | "K" <variable'> | "L" <variable'> | "M" <variable'> | "N" <variable'> | "O" <variable'> | "P" <variable'> | "Q" <variable'> | "R" <variable'> | "S" <variable'> | "T" <variable'> | "U" <variable'> | "V" <variable'> | "W" <variable'> | "X" <variable'> | "Y" <variable'> | "Z" <variable'> | "_" <variable'>
