@@ -22,7 +22,7 @@ class Parser():
                 char = line[caret]
                 # spaces just matter inside strings, so it's
                 # safe to ignore them while in initial state
-                if char == ' ' and current_state == 0:
+                if current_state == 0 and (char == ' ' or char == '\n') :
                     caret += 1
                     token_start = caret
                     continue
