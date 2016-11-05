@@ -16,8 +16,8 @@ class Parser():
         while line != "":
             print("-------------------------------------\nline: {}".format(line))
             caret = 0
-            wasFinal = False
-            token_start = 0;
+            token_start = 0
+            readSeparator = False
             while caret < len(line):
                 char = line[caret]
                 # spaces just matter inside strings, so it's
@@ -45,25 +45,28 @@ class Parser():
                         if char == '\n':
                             caret += 1
                         continue
-                    if current_state == 0 or wasFinal:
-                        print("Initial state or wasFinal is True: ({}, '{}') -> {}".format(current_state, char, self.dfa.table[current_state][c]))
+                    if current_state == 0 or readSeparator:
+                        print("Initial state or readSeparator is True: ({}, '{}') -> {}".format(current_state, char, self.dfa.table[current_state][c]))
                         current_state = self.dfa.table[current_state][c]
-                        # wasFinal was not necessarily True to enter this if
-                        wasFinal = True
+                        # readSeparator was not necessarily True to enter
+                        # this if and we might later need it True here
+                        readSeparator = True
                         caret += 1
                         continue
                 # if we're not looking at a separator and there's a mapping for it in the current state...
                 if c in self.dfa.table[current_state]:
                     print("({}, '{}') -> {}".format(current_state, char, self.dfa.table[current_state][c]))
                     current_state = self.dfa.table[current_state][c]
-                elif wasFinal == True and c in self.dfa.table[0]:
-                    print("wasFinal and there's a mapping in the initial state")
+                # if we previously looked at a separator and it just reached
+                # its final state here, right in the face of an ordinary character
+                elif readSeparator and c in self.dfa.table[0]:
+                    print("Previously read a separator and there's a mapping in the initial state")
                     self.output.append(str(current_state) + ": '" + line[token_start:caret] + "'")
                     current_state = self.dfa.table[0][c]
                     token_start = caret
                 else:
                     raise LexicalError(INVALID_TOKEN, i, "'{}' not mapped on state {}".format(char, current_state))
-                wasFinal = False
+                readSeparator = False
                 print("self.output: {}".format(self.output))
                 caret += 1
             i += 1
