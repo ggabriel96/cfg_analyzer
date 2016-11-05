@@ -37,7 +37,7 @@ class Parser():
                     # but if we're at a final state and still there's no mapping
                     # we simply reached a final state of a separator
                     if c not in self.dfa.table[current_state]:
-                        self.output.append("{" + str(current_state) + ": '" + line[token_start:caret] + "'}")
+                        self.output.append(str(current_state) + ": '" + line[token_start:caret] + "'")
                         print("self.output: {}".format(self.output))
                         token_start = caret
                         print("Resetting...")
@@ -58,7 +58,7 @@ class Parser():
                     current_state = self.dfa.table[current_state][c]
                 elif wasFinal == True and c in self.dfa.table[0]:
                     print("wasFinal and there's a mapping in the initial state")
-                    self.output.append("{" + str(current_state) + ": '" + line[token_start:caret] + "'}")
+                    self.output.append(str(current_state) + ": '" + line[token_start:caret] + "'")
                     current_state = self.dfa.table[0][c]
                     token_start = caret
                 else:
