@@ -46,7 +46,7 @@ class Parser():
                             caret += 1
                         continue
                     if current_state == 0 or readSeparator:
-                        print("Initial state or readSeparator is True: ({}, '{}') -> {}".format(current_state, char, self.dfa.table[current_state][c]))
+                        print("At initial state or previously read a separator: ({}, '{}') -> {}".format(current_state, char, self.dfa.table[current_state][c]))
                         current_state = self.dfa.table[current_state][c]
                         # readSeparator was not necessarily True to enter
                         # this if and we might later need it True here
