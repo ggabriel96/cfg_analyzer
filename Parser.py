@@ -5,16 +5,31 @@ from collections import OrderedDict
 class Parser():
     def __init__(self, dfa):
         self.dfa = dfa
-        self.output = []
-        self.symbols = {}
+        self.added = {}
+        self.table = {}
+        self.interesting = {50, 49, 9, 46, 14, 18, 15, 44, 21, 22, 30, 31, 20, 33, 34, 35, 17, 39, 16, 41, 42, 23, 26, 27, 28, 19, 36}
         self.separators = {" ", "(", ")", "*", "/", "%", "^", "?", ":", "<", "=", ">", "[", "]", "{", "}", ".", ",", ";", "'", "\"", "\n"}
+
+    def add(self, state, label):
+        if label in self.added:
+            self.table[0].append([state, self.added[label]])
+        else:
+            index = len(self.table)
+            if state in self.interesting:
+                self.table[0].append([state, index])
+                self.added[label] = index
+                self.table[index] = { "label": label }
+            else:
+                self.table[0].append([ state ])
 
     def parse(self, file):
         i = 1
+        added = {}
         current_state = 0
+        self.table[0] = []
         line = file.readline()
         while line != "":
-            print("-------------------------------------\nline: {}".format(line))
+            # print("-------------------------------------\nline: {}".format(line))
             caret = 0
             token_start = 0
             readSeparator = False
@@ -27,9 +42,9 @@ class Parser():
                     token_start = caret
                     continue
                 c = ord(char)
-                print("\n({}, '{}')".format(current_state, char if char != '\n' else "\\n"))
+                # print("\n({}, '{}')".format(current_state, char if char != '\n' else "\\n"))
                 if char in self.separators:
-                    print("'{}' is a separator".format(char if char != '\n' else "\\n"))
+                    # print("'{}' is a separator".format(char if char != '\n' else "\\n"))
                     # if we're not at a final state and there is no mapping for
                     # this char in the current state, then we found an error
                     if current_state not in self.dfa.finals and c not in self.dfa.table[current_state]:
@@ -37,16 +52,16 @@ class Parser():
                     # but if we're at a final state and still there's no mapping
                     # we simply reached a final state of a separator
                     if c not in self.dfa.table[current_state]:
-                        self.output.append(str(current_state) + ": '" + line[token_start:caret] + "'")
-                        print("self.output: {}".format(self.output))
+                        self.add(current_state, line[token_start:caret])
+                        # print("self.table[0]: {}".format(self.table[0]))
                         token_start = caret
-                        print("Resetting...")
+                        # print("Resetting...")
                         current_state = 0
                         if char == '\n':
                             caret += 1
                         continue
                     if current_state == 0 or readSeparator:
-                        print("At initial state or previously read a separator: ({}, '{}') -> {}".format(current_state, char, self.dfa.table[current_state][c]))
+                        # print("At initial state or previously read a separator: ({}, '{}') -> {}".format(current_state, char, self.dfa.table[current_state][c]))
                         current_state = self.dfa.table[current_state][c]
                         # readSeparator was not necessarily True to enter
                         # this if and we might later need it True here
@@ -55,19 +70,20 @@ class Parser():
                         continue
                 # if we're not looking at a separator and there's a mapping for it in the current state...
                 if c in self.dfa.table[current_state]:
-                    print("({}, '{}') -> {}".format(current_state, char, self.dfa.table[current_state][c]))
+                    # print("({}, '{}') -> {}".format(current_state, char, self.dfa.table[current_state][c]))
                     current_state = self.dfa.table[current_state][c]
                 # if we previously looked at a separator and it just reached
                 # its final state here, right in the face of an ordinary character
                 elif readSeparator and c in self.dfa.table[0]:
-                    print("Previously read a separator and there's a mapping in the initial state")
-                    self.output.append(str(current_state) + ": '" + line[token_start:caret] + "'")
+                    # print("Previously read a separator and there's a mapping in the initial state")
+                    self.add(current_state, line[token_start:caret])
                     current_state = self.dfa.table[0][c]
                     token_start = caret
                 else:
                     raise LexicalError(INVALID_TOKEN, i, "'{}' not mapped on state {}".format(char, current_state))
                 readSeparator = False
-                print("self.output: {}".format(self.output))
+                # print("self.table[0]: {}".format(self.table[0]))
                 caret += 1
             i += 1
             line = file.readline()
+        # print("self.table[0]: {}".format(self.table))
