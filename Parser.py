@@ -10,17 +10,17 @@ class Parser():
         self.interesting = {50, 49, 9, 46, 14, 18, 15, 44, 21, 22, 30, 31, 20, 33, 34, 35, 17, 39, 16, 41, 42, 23, 26, 27, 28, 19, 36}
         self.separators = {" ", "(", ")", "*", "/", "%", "^", "?", ":", "<", "=", ">", "[", "]", "{", "}", ".", ",", ";", "'", "\"", "\n"}
 
-    def add(self, state, label):
+    def add(self, state, label, line):
         if label in self.added:
-            self.table[0].append([state, self.added[label]])
+            self.table[0].append([state, line, self.added[label]])
         else:
             index = len(self.table)
             if state in self.interesting:
-                self.table[0].append([state, index])
+                self.table[0].append([state, line, index])
                 self.added[label] = index
                 self.table[index] = { "label": label }
             else:
-                self.table[0].append([ state ])
+                self.table[0].append([state, line])
 
     def parse(self, file):
         i = 1
@@ -52,7 +52,7 @@ class Parser():
                     # but if we're at a final state and still there's no mapping
                     # we simply reached a final state of a separator
                     if c not in self.dfa.table[current_state]:
-                        self.add(current_state, line[token_start:caret])
+                        self.add(current_state, line[token_start:caret], i)
                         # print("self.table[0]: {}".format(self.table[0]))
                         token_start = caret
                         # print("Resetting...")
@@ -76,7 +76,7 @@ class Parser():
                 # its final state here, right in the face of an ordinary character
                 elif readSeparator and c in self.dfa.table[0]:
                     # print("Previously read a separator and there's a mapping in the initial state")
-                    self.add(current_state, line[token_start:caret])
+                    self.add(current_state, line[token_start:caret], i)
                     current_state = self.dfa.table[0][c]
                     token_start = caret
                 else:
