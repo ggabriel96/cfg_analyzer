@@ -7,7 +7,7 @@
 <not> ::= "!"
 <equal> ::= "="
 <lines> ::= <line><lines> | ""
-<line> ::= <if> | <for> | <while> | <declaration> | <variable_assignment>
+<line> ::= <if> | <for> | <while> | <declaration> | <variable_assignment> | <semicolon>
 <if> ::= "if" <lpar> <expression> <rpar> <if'>
 <if'> ::= <line> | <lbrack> <lines> <rbrack> <else>
 <else> ::= "else" <else'> | ""

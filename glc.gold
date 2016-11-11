@@ -36,6 +36,7 @@
      |  <while>
      |  <declaration>
      |  <variable_assignment>
+     |  <semicolon>
 
 <if>
     ::= if <lpar> <expression> <rpar> <if_1>
@@ -351,15 +352,14 @@
      |  '<' <squote>
      |  '>' <squote>
      |  '|' <squote>
-     |  '\"' <squote>
-     |  '\\' <char_2>
-     |  ' ' <char_2>
+     |  '"' <squote>
+     |  '\' <char_2>
 
  <squote>
     ::= ''''
 
  <char_2>
-    ::= '\\' <squote>
+    ::= '\' <squote>
      |  '''' <squote>
      |  '0' <squote>
      |  'n' <squote>
@@ -380,8 +380,7 @@
      |  '9' <number_2>
 
  <number_1>
-    ::= ' ' <number_1>
-     |  '0' <number_2>
+    ::= '0' <number_2>
      |  '1' <number_2>
      |  '2' <number_2>
      |  '3' <number_2>
@@ -432,7 +431,7 @@
      |  '9' <number_4>
 
  <string>
-    ::= '\"' <string_char>
+    ::= '"' <string_char>
 
  <string_char>
     ::= 'a' <string_char>
@@ -527,12 +526,11 @@
      |  '<' <string_char>
      |  '>' <string_char>
      |  '|' <string_char>
-     |  ' ' <string_char>
-     |  '\\' <string_char_1>
-     |  '\"'
+     |  '\' <string_char_1>
+     |  '"'
 
  <string_char_1>
-    ::= '\\' <string_char>
-     |  '\"' <string_char>
+    ::= '\' <string_char>
+     |  '"' <string_char>
      |  'n' <string_char>
      |  't' <string_char>
