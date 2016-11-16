@@ -4,6 +4,7 @@ from Grammar import *
 from Parser import *
 from NDFA import *
 from DFA import *
+from Synt import *
 
 def main(argv):
     # print(argv)
@@ -23,7 +24,7 @@ def main(argv):
     # print("---------------------")
     # print("printndfa:"); b.printndfa()
     # print("ndfa final states: {}".format(b.finals))
-    # print(b.to_csv())
+    print(b.to_csv())
     # print("---------------------")
     c = b.to_dfa()
     c.printdfa()
@@ -36,6 +37,7 @@ def main(argv):
         print(p.table)
     else:
         print("No source code input")
+    d = Synt()
 
 if __name__ == "__main__":
     if len(sys.argv) == 3:
