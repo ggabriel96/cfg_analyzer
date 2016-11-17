@@ -3,16 +3,14 @@ from file import *
 
 class Synt():
     def __init__(self):
-        print("PAPAPAPAP")
         self.map = {3: '*', 1: '!', 5: '(', 6: ')', 8: ',', 10: ';', 11: '<', 12: '=', 13: '>', 24: '{', 25: '}', 40: 'for', 38: 'if', 29: 'while', 43: 'else', 32: 'or', 37: 'let'}
         self.rules = None
         self.ptable = None
         self.buildRules()
         self.buildLALR()
-        #print(self.rules)
+        # print(self.rules)
 
     def buildRules(self):
-        print("EBAAAA   ")
         with open('glcrules.htw', 'r') as f:
             tmp = f.read().split('\n')
         tmp.pop()
@@ -24,9 +22,9 @@ class Synt():
             index = 0
             cont = 0
             rule = ""
-            #print(">>>>" + line)
+            # print(">>>>" + line)
             for c in line:
-                #print("char: {}   estado:  {}".format(c, estado))
+                # print("char: {}   estado:  {}".format(c, estado))
                 if estado == 0: #Lê o numero
                     if c in string.whitespace:
                         estado = 1
@@ -34,27 +32,27 @@ class Synt():
                     index *= 10
                     index += int(c)
 
-                if estado == 1: #Ignora espaços
+                if estado == 1: # ignoring whitespaces
                     if c not in string.whitespace:
                         rule = c
                         estado = 2
                         continue
 
-                if estado == 2: #Lê o nome da regra
+                if estado == 2: # reading the rule name
                     if c in string.whitespace:
                         estado = 3
                         continue
                     rule += c
 
-                if estado == 3: # Ignora tudo até o =
+                if estado == 3: # ignoring everything until '='
                     if c == '=':
                         estado = 4
                         continue
 
-                if estado == 4: # Conta os espaçoes (quantidade de produções)
+                if estado == 4: # counting productions
                     if c == ' ':
                         cont += 1
-            #print("self.rules[{}] = [{}, {}]".format(index, rule, cont))
+            # print("self.rules[{}] = [{}, {}]".format(index, rule, cont))
             self.rules[index] = [rule, cont]
 
     def buildLALR(self):
