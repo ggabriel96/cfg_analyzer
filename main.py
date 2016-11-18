@@ -37,7 +37,8 @@ def main(argv):
         print(p.table)
     else:
         print("No source code input")
-    d = Synt()
+    d = Synt().fromParser(p)
+    d.reckon()
 
 if __name__ == "__main__":
     if len(sys.argv) == 3:

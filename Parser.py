@@ -83,4 +83,5 @@ class Parser():
                 caret += 1
             i += 1
             line = file.readline()
+        self.add(None, "(EOF)", i)
         # print("self.table[0]: {}".format(self.table))

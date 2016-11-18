@@ -4,11 +4,20 @@ from file import *
 
 class Synt():
     def __init__(self):
+        self.tape = None
         self.rules = None
         self.ptable = None
+        self.interesting = None
         self.buildRules()
         self.buildLALR()
         # print(self.rules)
+
+    @classmethod
+    def fromParser(cls, parser):
+        self = cls()
+        self.tape = parser.table
+        self.interesting = parser.interesting
+        return self
 
     def buildRules(self):
         with open('glcrules.htw', 'r') as f:
@@ -71,3 +80,55 @@ class Synt():
                 symbol = f.getNextWord()
         # print(self.ptable)
         # print(self.ptable[38])
+
+    def parse(self, stack, symbol):
+        print("parse")
+        print("stack: {}".format(stack))
+        print("symbol: {}".format(symbol))
+        if symbol in self.ptable[stack[len(stack) - 1]]:
+            entry = self.ptable[stack[len(stack) - 1]][symbol]
+            print("entry: {}".format(entry))
+            action = entry[0]
+            target = entry[1]
+            if action == 'a':
+                print("ACCEPTED")
+                return True
+            elif action == 's':
+                print('s')
+                stack.append(symbol)
+                stack.append(target)
+                print("stack: {}".format(stack))
+                return True
+            elif action == 'r':
+                print('r')
+                for times in range(2 * self.rules[target][1]):
+                    stack.pop()
+                g = self.ptable[stack[len(stack) - 1]][self.rules[target][0]]
+                if g[0] == 'g':
+                    stack.append(self.rules[target][0])
+                    stack.append(g[1])
+                else:
+                    raise SyntaxError("Expected action 'g'")
+            else:
+                raise SyntaxError("Invalid action")
+        else:
+            raise SyntaxError("Symbol not in parsing table")
+        print("stack: {}".format(stack))
+        return False
+
+    def reckon(self):
+        e = 0
+        stack = [ 0 ]
+        while e < len(self.tape[0]):
+            elem = self.tape[0][e]
+            label = self.tape[elem[2]]['label']
+            print("\nelem: {}".format(elem))
+            if elem[0] in self.interesting:
+                i = 0
+                while i < len(label):
+                    if self.parse(stack, label[i]) == True:
+                        i += 1
+                e += 1
+            else:
+                if self.parse(stack, label) == True:
+                    e += 1
