@@ -1,9 +1,9 @@
 import string
+from const import *
 from file import *
 
 class Synt():
     def __init__(self):
-        self.map = {3: '*', 1: '!', 5: '(', 6: ')', 8: ',', 10: ';', 11: '<', 12: '=', 13: '>', 24: '{', 25: '}', 40: 'for', 38: 'if', 29: 'while', 43: 'else', 32: 'or', 37: 'let'}
         self.rules = None
         self.ptable = None
         self.buildRules()
@@ -15,7 +15,6 @@ class Synt():
             tmp = f.read().split('\n')
         tmp.pop()
         self.rules = [None] * len(tmp)
-        self.ptable = [None] * len(tmp)
         print("\n\n")
         for line in tmp:
             estado = 0
@@ -56,20 +55,19 @@ class Synt():
             self.rules[index] = [rule, cont]
 
     def buildLALR(self):
+        self.ptable = [None] * STATES
         f = File('lalr.htw')
-        string = f.getNextWord()
-        index = 0
-        state = None
-        if string == 'State':
-            self.ptable[index] = {}
-            index = f.getNextInt()
+        for i in range(STATES):
+            f.readline()
+            state = None
+            self.ptable[i] = {}
             symbol = f.getNextWord()
-            action = f.getNextWord()
-            if action != 'a':
-                state = f.getNextInt()
-            print(index)
-            print(symbol)
-            print(action)
-            print(state)
-            self.ptable[index][symbol] = [action, state]
-        print(self.ptable[0])
+            while symbol != 'State':
+                action = f.getNextWord()
+                if action != 'a':
+                    state = f.getNextInt()
+                # print("{}: {} {} {}".format(i, symbol, action, state))
+                self.ptable[i][symbol] = [action, state]
+                symbol = f.getNextWord()
+        # print(self.ptable)
+        # print(self.ptable[38])

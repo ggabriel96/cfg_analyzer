@@ -15,12 +15,9 @@ class Parser():
             self.table[0].append([state, line, self.added[label]])
         else:
             index = len(self.table)
-            if state in self.interesting:
-                self.table[0].append([state, line, index])
-                self.added[label] = index
-                self.table[index] = { "label": label }
-            else:
-                self.table[0].append([state, line])
+            self.table[0].append([state, line, index])
+            self.added[label] = index
+            self.table[index] = { "label": label }
 
     def parse(self, file):
         i = 1
