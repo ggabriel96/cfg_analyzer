@@ -1,8 +1,8 @@
-x = "o   i";
-i=7 plus -4;for(i=0;i<10;i=i + 1) {
+x = "oi";
+i=7 plus -4;for(i=0;i<10;i=i plus 1) {
 
-ertyui; if
+let ertyui; if
 
 
 
-(i===2 or i == 4){}}
+(i==2 or i == 4){}
