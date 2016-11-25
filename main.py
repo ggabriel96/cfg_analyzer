@@ -28,7 +28,7 @@ def main(argv):
     # print("---------------------")
     c = b.to_dfa()
     # c.printdfa()
-    print("\nDFA final states: {}\n".format(c.finals))
+    # print("\nDFA final states: {}\n".format(c.finals))
     # print(c.to_csv())
     p = Parser(c)
     if argv[2] is not None:

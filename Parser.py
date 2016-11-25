@@ -4,20 +4,33 @@ from collections import OrderedDict
 
 class Parser():
     def __init__(self, dfa):
+        self.scope = 0
+        self.scope_count = 1
+        self.scope_stack = [ 0 ]
         self.dfa = dfa
         self.added = {}
         self.table = {}
-        self.interesting = {50, 49, 9, 46, 14, 18, 15, 44, 21, 22, 30, 31, 20, 33, 34, 35, 17, 39, 16, 41, 42, 23, 26, 27, 28, 19, 36}
         self.separators = {" ", "(", ")", "*", "/", "%", "^", "?", ":", "<", "=", ">", "[", "]", "{", "}", ".", ",", ";", "'", "\"", "\n"}
 
     def add(self, state, label, line):
-        if label in self.added:
+        if (label in self.added and state not in VARIABLES) or (label in self.added and state in VARIABLES and self.table[self.added[label]]["scope"] == self.scope):
             self.table[0].append([state, line, self.added[label]])
         else:
             index = len(self.table)
             self.table[0].append([state, line, index])
             self.added[label] = index
             self.table[index] = { "label": label }
+            if state in VARIABLES:
+                self.table[index]["scope"] = self.scope
+        if state == 24:
+            self.scope = self.scope_count
+            self.scope_stack.append(self.scope)
+            self.scope_count += 1
+            print("'L' self.scope: {}, self.scope_count: {}".format(self.scope, self.scope_count))
+        elif state == 25:
+            self.scope_stack.pop()
+            self.scope = self.scope_stack[-1]
+            print("'R' self.scope: {}, self.scope_stack: {}".format(self.scope, self.scope_stack))
 
     def parse(self, file):
         i = 1

@@ -1,8 +1,15 @@
-x = "oi";
-i=7 plus -4;for(i=0;i<10;i=i plus 1) {
+let x = "oi", i;
+i=7 plus -4;
+for(i=0;i<10;i=i plus 1) {
+  let ertyui;
 
-let ertyui; if
+  if (i==2 or i == 4){
+    let x;
+  }
+  let x;
+}
+if (true){
+  let x;
+}
 
-
-
-(i==2 or i == 4){}
+let x;

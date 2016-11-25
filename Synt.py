@@ -7,8 +7,6 @@ class Synt():
         self.tape = None
         self.rules = None
         self.ptable = None
-        self.interesting = None
-        self.variables = {14, 18, 15, 44, 21, 22, 30, 31, 20, 33, 34, 35, 17, 39, 16, 41, 42, 23, 26, 27, 28, 19, 36}
         self.buildRules()
         self.buildLALR()
         # print(self.rules)
@@ -17,8 +15,6 @@ class Synt():
     def fromParser(cls, parser):
         self = cls()
         self.tape = parser.table
-        self.interesting = parser.interesting
-        self.addValue()
         return self
 
     def buildRules(self):
@@ -64,11 +60,6 @@ class Synt():
                         cont += 1
             # print("self.rules[{}] = [{}, {}]".format(index, rule, cont))
             self.rules[index] = [rule, cont]
-
-    def addValue(self):
-        for token in self.tape[0]:
-            if token[0] is not None and token[0] in self.variables:
-                self.tape[token[2]]["value"] = None
 
     def buildLALR(self):
         self.ptable = [None] * STATES
@@ -130,7 +121,7 @@ class Synt():
             elem = self.tape[0][e]
             label = self.tape[elem[2]]['label']
             # print("\nelem: {}".format(elem))
-            if elem[0] in self.interesting:
+            if elem[0] in INTERESTING:
                 i = 0
                 while i < len(label):
                     if self.parse(stack, label[i]) == True:
@@ -141,25 +132,37 @@ class Synt():
                     e += 1
         self.semantic()
 
+    def lesser_scope(self, known, variable):
+        for scope in known[variable["label"]]:
+            if variable["scope"] >= scope:
+                return False
+        return True
+
     def semantic(self):
         i = 0
-        known = set()
-        length = len(self.tape)
+        known = {}
+        length = len(self.tape[0])
         while i < length:
             # 37 is the class for 'let'
             if self.tape[0][i][0] is not None and self.tape[0][i][0] == 37:
                 j = i + 1
                 state = 0 # seeking a variable
                 while self.tape[0][j][0] != 10:
-                    if state == 0 and self.tape[0][j][0] in self.variables:
-                        known.add(self.tape[self.tape[0][j][2]]["label"])
+                    if state == 0 and self.tape[0][j][0] in VARIABLES:
+                        if self.tape[self.tape[0][j][2]]["label"] in known and self.tape[self.tape[0][j][2]]["scope"] in known[self.tape[self.tape[0][j][2]]["label"]]:
+                            print("Redeclaration of variable '" + self.tape[self.tape[0][j][2]]["label"] + "' at line " + str(self.tape[0][j][1]))
+                        # known.add(self.tape[self.tape[0][j][2]]["label"])
+                        if self.tape[self.tape[0][j][2]]["label"] not in known:
+                            known[self.tape[self.tape[0][j][2]]["label"]] = { self.tape[self.tape[0][j][2]]["scope"] }
+                        else:
+                            known[self.tape[self.tape[0][j][2]]["label"]].add(self.tape[self.tape[0][j][2]]["scope"])
                         state = 1 # seeking a comma
-                    elif state == 1 and self.tape[0][j][0] in self.variables and self.tape[self.tape[0][j][2]]["label"] not in known:
+                    elif state == 1 and self.tape[0][j][0] in VARIABLES and self.tape[self.tape[0][j][2]]["label"] not in known:
                         print("Unknown variable '" + self.tape[self.tape[0][j][2]]["label"] + "' at line " + str(self.tape[0][j][1]))
                     elif state == 1 and self.tape[0][j][0] == 8:
                         state = 0
                     j += 1
                 i = j
-            elif self.tape[0][i][0] is not None and self.tape[0][i][0] in self.variables and self.tape[self.tape[0][i][2]]["label"] not in known:
+            elif self.tape[0][i][0] is not None and self.tape[0][i][0] in VARIABLES and (self.tape[self.tape[0][i][2]]["label"] not in known or self.lesser_scope(known, self.tape[self.tape[0][i][2]])):
                 print("Unknown variable '" + self.tape[self.tape[0][i][2]]["label"] + "' at line " + str(self.tape[0][i][1]))
             i += 1
