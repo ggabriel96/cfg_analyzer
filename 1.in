@@ -1,15 +1,11 @@
-let x = "oi", i;
-i=7 plus -4;
-for(i=0;i<10;i=i plus 1) {
-  let ertyui;
-
-  if (i==2 or i == 4){
+let i, x = "oi";
+for (i = 0; i < 10; i = i plus 1) {
+  if (i == 2 or i == 4) {
     let x;
   }
   let x;
 }
-if (true){
+if (true) {
   let x;
 }
-
 let x;

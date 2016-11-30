@@ -7,6 +7,7 @@ class Synt():
         self.tape = None
         self.rules = None
         self.ptable = None
+        self.err_count = 0
         self.buildRules()
         self.buildLALR()
         # print(self.rules)
@@ -15,7 +16,109 @@ class Synt():
     def fromParser(cls, parser):
         self = cls()
         self.tape = parser.table
+        self.buildErrors()
         return self
+
+    def buildErrors(self):
+        for state in self.ptable:
+            foundReduce = False
+            for symbol, action in state.items():
+                if action[0] == 'r':
+                    foundReduce = True
+                    self.fillReduce(state, action[1])
+                    break
+        self.ptable[17]["!"] = ["e", 0]
+        self.ptable[17]["\""] = ["e", 0]
+        self.ptable[17]["#"] = ["e", 0]
+        self.ptable[17]["$"] = ["e", 0]
+        self.ptable[17]["%"] = ["e", 0]
+        self.ptable[17]["&"] = ["e", 0]
+        self.ptable[17]["'"] = ["e", 0]
+        self.ptable[17]["("] = ["e", 0]
+        self.ptable[17][")"] = ["e", 0]
+        self.ptable[17]["*"] = ["e", 0]
+        self.ptable[17]["+"] = ["e", 0]
+        self.ptable[17][","] = ["e", 0]
+        self.ptable[17]["-"] = ["e", 0]
+        self.ptable[17]["."] = ["e", 0]
+        self.ptable[17]["/"] = ["e", 0]
+        self.ptable[17][":"] = ["e", 0]
+        self.ptable[17][";"] = ["e", 0]
+        self.ptable[17]["<"] = ["e", 0]
+        self.ptable[17]["="] = ["e", 0]
+        self.ptable[17][">"] = ["e", 0]
+        self.ptable[17]["?"] = ["e", 0]
+        self.ptable[17]["@"] = ["e", 0]
+        self.ptable[17]["["] = ["e", 0]
+        self.ptable[17]["\\"] = ["e", 0]
+        self.ptable[17]["]"] = ["e", 0]
+        self.ptable[17]["^"] = ["e", 0]
+        self.ptable[17]["`"] = ["e", 0]
+        self.ptable[17]["{"] = ["e", 0]
+        self.ptable[17]["|"] = ["e", 0]
+        self.ptable[17]["}"] = ["e", 0]
+        self.ptable[17]["~"] = ["e", 0]
+
+        self.ptable[184]["!"] = ["e", 1]
+        self.ptable[184]["\""] = ["e", 1]
+        self.ptable[184]["#"] = ["e", 1]
+        self.ptable[184]["$"] = ["e", 1]
+        self.ptable[184]["%"] = ["e", 1]
+        self.ptable[184]["&"] = ["e", 1]
+        self.ptable[184]["'"] = ["e", 1]
+        self.ptable[184]["("] = ["e", 1]
+        self.ptable[184][")"] = ["e", 1]
+        self.ptable[184]["*"] = ["e", 1]
+        self.ptable[184]["+"] = ["e", 1]
+        self.ptable[184][","] = ["e", 1]
+        self.ptable[184]["-"] = ["e", 1]
+        self.ptable[184]["."] = ["e", 1]
+        self.ptable[184]["/"] = ["e", 1]
+        self.ptable[184][":"] = ["e", 1]
+        self.ptable[184][";"] = ["e", 1]
+        self.ptable[184]["<"] = ["e", 1]
+        self.ptable[184]["="] = ["e", 1]
+        self.ptable[184][">"] = ["e", 1]
+        self.ptable[184]["?"] = ["e", 1]
+        self.ptable[184]["@"] = ["e", 1]
+        self.ptable[184]["["] = ["e", 1]
+        self.ptable[184]["\\"] = ["e", 1]
+        self.ptable[184]["]"] = ["e", 1]
+        self.ptable[184]["^"] = ["e", 1]
+        self.ptable[184]["`"] = ["e", 1]
+        self.ptable[184]["{"] = ["e", 1]
+        self.ptable[184]["|"] = ["e", 1]
+        self.ptable[184]["}"] = ["e", 1]
+        self.ptable[184]["~"] = ["e", 1]
+
+        self.ptable[117]["#"] = ["e", 2]
+        self.ptable[117]["$"] = ["e", 2]
+        self.ptable[117]["%"] = ["e", 2]
+        self.ptable[117]["&"] = ["e", 2]
+        self.ptable[117]["*"] = ["e", 2]
+        self.ptable[117][","] = ["e", 2]
+        self.ptable[117]["/"] = ["e", 2]
+        self.ptable[117][":"] = ["e", 2]
+        self.ptable[117][";"] = ["e", 2]
+        self.ptable[117]["<"] = ["e", 2]
+        self.ptable[117]["="] = ["e", 2]
+        self.ptable[117][">"] = ["e", 2]
+        self.ptable[117]["?"] = ["e", 2]
+        self.ptable[117]["@"] = ["e", 2]
+        self.ptable[117]["["] = ["e", 2]
+        self.ptable[117]["\\"] = ["e", 2]
+        self.ptable[117]["]"] = ["e", 2]
+        self.ptable[117]["^"] = ["e", 2]
+        self.ptable[117]["`"] = ["e", 2]
+        self.ptable[117]["{"] = ["e", 2]
+        self.ptable[117]["|"] = ["e", 2]
+        self.ptable[117]["}"] = ["e", 2]
+        self.ptable[117]["~"] = ["e", 2]
+
+    def fillReduce(self, state, target):
+        for symbol in SYMBOLS:
+            if symbol not in state:
+                state[symbol] = ['r', target]
 
     def buildRules(self):
         with open('glcrules.htw', 'r') as f:
@@ -73,13 +176,10 @@ class Synt():
                 action = f.getNextWord()
                 if action != 'a':
                     state = f.getNextInt()
-                # print("{}: {} {} {}".format(i, symbol, action, state))
                 self.ptable[i][symbol] = [action, state]
                 symbol = f.getNextWord()
-        # print(self.ptable)
-        # print(self.ptable[38])
 
-    def parse(self, stack, symbol):
+    def parse(self, stack, symbol, line):
         # print("parse")
         # print("stack: {}".format(stack))
         # print("symbol: {}".format(symbol))
@@ -89,7 +189,10 @@ class Synt():
             action = entry[0]
             target = entry[1]
             if action == 'a':
-                # print("ACCEPTED")
+                if self.err_count == 0:
+                    print("ACCEPTED")
+                else:
+                    print("Syntactic analysis finished with {} error{}".format(self.err_count, "s" if self.err_count > 1 else ""))
                 return True
             elif action == 's':
                 # print('s')
@@ -107,10 +210,26 @@ class Synt():
                     stack.append(g[1])
                 else:
                     raise SyntaxError("Expected action 'g'")
+            elif action == 'e':
+                self.err_count += 1
+                if target == 0:
+                    print("Expected variable name after 'let' at line {}".format(line))
+                    stack.append('<variable>')
+                    stack.append(97)
+                elif target == 1:
+                    print("Expected variable name after ',' at line {}".format(line))
+                    stack.append('<variable>')
+                    stack.append(97)
+                elif target == 2:
+                    print("Expected expression after '=', at line {}".format(line))
+                    stack.append('<operand>')
+                    stack.append(178)
+                else:
+                    raise SyntaxError("Invalid error target")
             else:
                 raise SyntaxError("Invalid action")
         else:
-            raise SyntaxError("Symbol not in parsing table")
+            raise SyntaxError("Symbol '{}' not in parsing table.\nstack: {}".format(symbol, stack))
         # print("stack: {}".format(stack))
         return False
 
@@ -124,11 +243,11 @@ class Synt():
             if elem[0] in INTERESTING:
                 i = 0
                 while i < len(label):
-                    if self.parse(stack, label[i]) == True:
+                    if self.parse(stack, label[i], elem[1]) == True:
                         i += 1
                 e += 1
             else:
-                if self.parse(stack, label) == True:
+                if self.parse(stack, label, elem[1]) == True:
                     e += 1
         self.semantic()
 
