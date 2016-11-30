@@ -229,7 +229,7 @@ class Synt():
             else:
                 raise SyntaxError("Invalid action")
         else:
-            raise SyntaxError("Symbol '{}' not in parsing table.\nstack: {}".format(symbol, stack))
+            raise SyntaxError("Symbol '{}', at line {}, not in parsing table.\nstack: {}".format(symbol, line, stack))
         # print("stack: {}".format(stack))
         return False
 
