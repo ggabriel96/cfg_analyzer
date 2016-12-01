@@ -29,7 +29,7 @@ def main(argv):
     if argv[2] is not None:
         with open(argv[2], 'r') as f:
             p.parse(f)
-        print(p.table)
+        print("\nSymbol table: {}\n".format(p.table))
     else:
         print("No source code input")
 
