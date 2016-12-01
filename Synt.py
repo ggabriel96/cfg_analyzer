@@ -164,7 +164,7 @@ class Synt():
             self.rules[index] = [rule, cont]
 
     def buildLALR(self):
-        self.ptable = [None] * STATES
+        self.ptable = [None] * (STATES)
         f = File('lalr.htw')
         for i in range(STATES):
             f.readline()
@@ -175,13 +175,18 @@ class Synt():
                 action = f.getNextWord()
                 if action != 'a':
                     state = f.getNextInt()
+                # print("{} {} {}".format(i, symbol, [action, state]))
                 self.ptable[i][symbol] = [action, state]
                 symbol = f.getNextWord()
 
+        # print(self.ptable)
+
     def parse(self, stack, symbol, line):
-        # print("parse")
+        # print("parse -> line: {}".format(line))
         # print("stack: {}".format(stack))
         # print("symbol: {}".format(symbol))
+        # if len(stack) > 22:
+        #     print("index: {}\nsizeptable: {}".format(stack[22], len(self.ptable)))
         if symbol in self.ptable[stack[len(stack) - 1]]:
             entry = self.ptable[stack[len(stack) - 1]][symbol]
             # print("entry: {}".format(entry))
@@ -189,7 +194,7 @@ class Synt():
             target = entry[1]
             if action == 'a':
                 if self.err_count == 0:
-                    print("ACCEPTED\n")
+                    print("Syntactic analysis finished without errors\n")
                 else:
                     print("Syntactic analysis finished with {} error{}".format(self.err_count, "s" if self.err_count > 1 else ""))
                 return True
