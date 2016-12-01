@@ -1,0 +1,26 @@
+/* Arquivo:   README
+   Autores:   Acácia dos Campos da Terra,
+              Gabriel Batista Galli,
+              João Pedro Winckler Bernardi e
+              Vladimir Belinski
+   Descrição: o presente arquivo faz parte da resolução do Projeto 1 do CCR Construção de Compiladores, 2016-2, do curso de
+              Ciência da Computação da Universidade Federal da Fronteira Sul - UFFS, o qual consiste na construção de um
+              analisador léxico.
+              --> README contém instruções relevantes à compilação, execução e arquivos componentes do projeto
+*/
+
+Compilação e execução: em ambiente Linux, estando na pasta onde os arquivos que compõem a resolução do trabalho se encontram,
+executar o comando 'python3.5 main.py glc.txt <arquivo de teste>'. Ex.: python3.5 main.py glc.txt 1.in
+
+Arquivos que compõem o projeto:
+
+--> Arquivos que contêm a implementação do projeto: "const.py", "DFA.py", "Grammar.py", "GrammarError.py", "LexicalError.py",
+"main.py", "NDFA.py", "Parser.py" e "Symbol.py"
+
+--> Arquivos de teste: "1.in", "2.in" e "3.in"
+
+--> Arquivo que contém a definição da gramática: "glc.txt"
+
+--> Arquivo que contém o projeto inicial da máquina de estados para leitura da gramática: "GLC.asta"
+
+--> Relatório de implementação: "Projeto 1 Compiladores - Analisador Léxico.pdf"

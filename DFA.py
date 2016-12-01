@@ -8,11 +8,10 @@ class DFA():
         self.finals = set()
 
     def printdfa(self):
-        print("\nDFA:")
         for i in range(len(self.table)):
             print("State #{}: ".format(i))
             for char, estado in self.table[i].items():
-                print("Caracter \'{}\' vai para estado {}".format(chr(char), estado))
+                print("Character \'{}\' goes to state {}".format(chr(char), estado))
             print()
 
     def is_final(self, state):

@@ -18,11 +18,10 @@ class NDFA():
         return self
 
     def printndfa(self):
-        print("<=========>")
         for i in range(len(self.table)):
             print("State #{}: ".format(i))
             for char, estado in self.table[i].items():
-                print("Caracter \'{}\' vai para estado {}".format(chr(char), estado))
+                print("Character \'{}\' goes to state {}".format(chr(char), estado))
             print()
 
     def is_final(self, frozen_dstate):
@@ -49,14 +48,14 @@ class NDFA():
             if nstate in done:
                 continue
             done.add(nstate)
-            print("\nMaking state {} deterministic...".format(self.frozenstr(nstate)))
+            # print("\nMaking state {} deterministic...".format(self.frozenstr(nstate)))
             for char in list(range(UNICODE_LATIN_START, UNICODE_LATIN_END)):
                 dstate = set()
                 for ns in nstate:
                     if char in self.table[ns]:
-                        print("Through char '{}'...".format(chr(char)))
+                        # print("Through char '{}'...".format(chr(char)))
                         for t in self.table[ns][char]:
-                            print("Target '{}'".format(t))
+                            # print("Target '{}'".format(t))
                             dstate.add(t)
                 if len(dstate) > 0:
                     frozen_dstate = frozenset(dstate)
@@ -66,7 +65,7 @@ class NDFA():
                         if encoding >= len(dfa.table):
                             dfa.table.append(OrderedDict())
                         encoding += 1
-                    print("dstate: {}, encoded: {}".format(self.frozenstr(frozen_dstate), encode[frozen_dstate]))
+                    # print("dstate: {}, encoded: {}".format(self.frozenstr(frozen_dstate), encode[frozen_dstate]))
                     dfa.table[encode[nstate]][char] = encode[frozen_dstate]
                     if self.is_final(frozen_dstate):
                         dfa.finals.add(encode[frozen_dstate])
@@ -77,14 +76,14 @@ class NDFA():
             if EPSILON in self.table[i]:
                 self.finals.add(i)
                 del self.table[i][EPSILON]
-                print("eps removed from state {}".format(i))
+                # print("eps removed from state {}".format(i))
 
     def build(self, grammar):
         encode = {}
         finalname = {}
         terminal_number = 0
         for rule, productions in grammar.rules.items():
-            print(rule)
+            # print(rule)
             if rule in grammar.asterisk or rule in grammar.ignore:
                 if rule in grammar.asterisk:
                     state = 0
@@ -161,14 +160,6 @@ class NDFA():
                                         self.table[state][ord(c)].append(prox)
                                     state = prox
         self.fix_eps()
-
-    def printndfa(self):
-        print("<=========>")
-        for i in range(len(self.table)):
-            print("State #{}: ".format(i))
-            for char, estado in self.table[i].items():
-                print("Caracter \'{}\' vai para estado {}".format(chr(char), estado))
-            print()
 
     def to_csv(self):
         csv = str()
