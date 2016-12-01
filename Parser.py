@@ -26,11 +26,11 @@ class Parser():
             self.scope = self.scope_count
             self.scope_stack.append(self.scope)
             self.scope_count += 1
-            print("'L' self.scope: {}, self.scope_count: {}".format(self.scope, self.scope_count))
+            # print("'L' self.scope: {}, self.scope_count: {}".format(self.scope, self.scope_count))
         elif state == 25:
             self.scope_stack.pop()
             self.scope = self.scope_stack[-1]
-            print("'R' self.scope: {}, self.scope_stack: {}".format(self.scope, self.scope_stack))
+            # print("'R' self.scope: {}, self.scope_stack: {}".format(self.scope, self.scope_stack))
 
     def parse(self, file):
         i = 1

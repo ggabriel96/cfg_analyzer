@@ -14,11 +14,11 @@ class File:
     def close(self):
         self.f.close()
 
-    #Returns nextInt in the file
+    # Returns nextInt in the file
     def getNextInt(self):
         positive = True; num = self.f.read(1)
 
-        while not num.isnumeric(): #Searches the first digit
+        while not num.isnumeric(): # Searches the first digit
             if num == '-':
                 positive = False
             else:
@@ -26,22 +26,22 @@ class File:
             num = self.f.read(1)
 
         tmp = self.f.read(1)
-        while tmp.isnumeric(): #Reads the number
+        while tmp.isnumeric(): # Reads the number
             num += tmp
             tmp = self.f.read(1)
 
         num = int(num)
-        if positive == False: #Correct the sinal (if any)
+        if positive == False: # Correct the sinal (if any)
             num *= -1
 
         return int(num)
 
     def getNextWord(self):
         word = self.f.read(1)
-        while word in string.whitespace: #Ignores white spaces (tab, space, \n) and get the first char
+        while word in string.whitespace: # Ignores white spaces (tab, space, \n) and get the first char
             word = self.f.read(1)
         tmp = self.f.read(1)
-        while tmp not in string.whitespace: #Reads the word
+        while tmp not in string.whitespace: # Reads the word
             word += tmp
             tmp = self.f.read(1)
         return word

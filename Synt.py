@@ -125,7 +125,6 @@ class Synt():
             tmp = f.read().split('\n')
         tmp.pop()
         self.rules = [None] * len(tmp)
-        # print("\n\n")
         for line in tmp:
             estado = 0
             index = 0
@@ -133,32 +132,32 @@ class Synt():
             rule = ""
             # print(">>>>" + line)
             for c in line:
-                # print("char: {}   estado:  {}".format(c, estado))
-                if estado == 0: #Lê o numero
+                # print("char: {}   state:  {}".format(c, estado))
+                if estado == 0: # Reads the number
                     if c in string.whitespace:
                         estado = 1
                         continue
                     index *= 10
                     index += int(c)
 
-                if estado == 1: # ignoring whitespaces
+                if estado == 1: # Ignoring whitespaces
                     if c not in string.whitespace:
                         rule = c
                         estado = 2
                         continue
 
-                if estado == 2: # reading the rule name
+                if estado == 2: # Reading the rule name
                     if c in string.whitespace:
                         estado = 3
                         continue
                     rule += c
 
-                if estado == 3: # ignoring everything until '='
+                if estado == 3: # Ignoring everything until '='
                     if c == '=':
                         estado = 4
                         continue
 
-                if estado == 4: # counting productions
+                if estado == 4: # Counting productions
                     if c == ' ':
                         cont += 1
             # print("self.rules[{}] = [{}, {}]".format(index, rule, cont))
@@ -190,18 +189,16 @@ class Synt():
             target = entry[1]
             if action == 'a':
                 if self.err_count == 0:
-                    print("ACCEPTED")
+                    print("ACCEPTED\n")
                 else:
                     print("Syntactic analysis finished with {} error{}".format(self.err_count, "s" if self.err_count > 1 else ""))
                 return True
             elif action == 's':
-                # print('s')
                 stack.append(symbol)
                 stack.append(target)
                 # print("stack: {}".format(stack))
                 return True
             elif action == 'r':
-                # print('r')
                 for times in range(2 * self.rules[target][1]):
                     stack.pop()
                 g = self.ptable[stack[len(stack) - 1]][self.rules[target][0]]
@@ -265,7 +262,7 @@ class Synt():
             # 37 is the class for 'let'
             if self.tape[0][i][0] is not None and self.tape[0][i][0] == 37:
                 j = i + 1
-                state = 0 # seeking a variable
+                state = 0 # Seeking a variable
                 while self.tape[0][j][0] != 10:
                     if state == 0 and self.tape[0][j][0] in VARIABLES:
                         if self.tape[self.tape[0][j][2]]["label"] in known and self.tape[self.tape[0][j][2]]["scope"] in known[self.tape[self.tape[0][j][2]]["label"]]:
@@ -275,7 +272,7 @@ class Synt():
                             known[self.tape[self.tape[0][j][2]]["label"]] = { self.tape[self.tape[0][j][2]]["scope"] }
                         else:
                             known[self.tape[self.tape[0][j][2]]["label"]].add(self.tape[self.tape[0][j][2]]["scope"])
-                        state = 1 # seeking a comma
+                        state = 1 # Seeking a comma
                     elif state == 1 and self.tape[0][j][0] in VARIABLES and self.tape[self.tape[0][j][2]]["label"] not in known:
                         print("Unknown variable '" + self.tape[self.tape[0][j][2]]["label"] + "' at line " + str(self.tape[0][j][1]))
                     elif state == 1 and self.tape[0][j][0] == 8:
